@@ -17,6 +17,16 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 
 Thanks to Bart Massey for teaching the course material.
 
+Thanks to the developers of tokio and axum.
+
+## License
+
+This project is licensed with the [MIT license](./LICENSE).
+
 ## References  
 
 Gruber, Bastian. Rust Web Development
+
+https://github.com/tokio-rs/axum
+
+https://github.com/pdx-cs-rust-web
