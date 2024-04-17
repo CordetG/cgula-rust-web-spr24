@@ -30,3 +30,5 @@ Gruber, Bastian. Rust Web Development
 https://github.com/tokio-rs/axum
 
 https://github.com/pdx-cs-rust-web
+
+https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
