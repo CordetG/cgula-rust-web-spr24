@@ -13,6 +13,10 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 
 <!-- Code Snippets -->
 
+## Error Notes
+
+To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
+
 ## Acknowledgments
 
 Thanks to Bart Massey for teaching the course material.
