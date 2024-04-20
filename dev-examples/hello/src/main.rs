@@ -1,10 +1,13 @@
 use std::todo;
-#[allow(unused_imports)]
-use std::net::{TcpListener, TcpStream};
+use std::net::{TcpStream, Ipv4Addr, SocketAddrV4};
 // For empty ID checking
 #[allow(unused_imports)]
 use std::{fmt::Error, io::ErrorKind, process::id};
 use std::collections::HashMap;
+use axum::{
+    routing::get,
+    Router,
+};
 
 #[allow(unused_variables)]
 #[allow(dead_code)]
@@ -17,12 +20,21 @@ fn handle_client(stream: TcpStream) {
  
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let localhost = Ipv4Addr::new(127, 0, 0, 1);
+    let socket_addr = SocketAddrV4::new(localhost, 3000);
     // http example
-    /* let listener = TcpListener::bind("127.0.0.1:80")?;
+    /*let listener = TcpListener::bind("127.0.0.1:80")?;
     for stream in listener.incoming() {
         handle_client(stream?);
     }
     Ok(())*/
+
+    // axum crate example -- administered to ch.1 example
+    let http_server = Router::new().route("/", get(|| async { "Hello, World!" }));
+
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    axum::serve(listener, http_server).await.unwrap();
 
     // reqwest with async/await
     let resp = reqwest::get("https://httpbin.org/ip")
