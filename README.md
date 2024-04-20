@@ -9,9 +9,33 @@ Professor: Bart Massey
 
 Rust Web Example is a course repo dedicated to Rust Web Development. The focus of this repo will be demonstrating web dev skills [*in rust*], such as providing a web service, REST API, backend, frontend, and more.  
 
+## Setup
+
 <!-- Setup Section -->
 
+Setting up tokio:
+
+```zsh
+$ cargo add tokio --features full
+```
+
 <!-- Code Snippets -->
+## Chapters
+
+### Chapter 1
+
+Basic server up and running from chapter 1:
+
+![Image of server](dev-examples/assets/hello-server.png)
+
+<!-- Checking -->
+Passes cargo clippy
+
+```zsh
+$ cargo clippy
+    Checking hello v0.1.0 (<path>)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.11s
+```
 
 ## Error Notes
 
@@ -31,8 +55,12 @@ This project is licensed with the [MIT license](./LICENSE).
 
 Gruber, Bastian. Rust Web Development
 
+https://github.com/Rust-Web-Development/code
+
 https://github.com/tokio-rs/axum
 
 https://github.com/pdx-cs-rust-web
 
 https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
+
+https://docs.rs/axum/latest/axum/
