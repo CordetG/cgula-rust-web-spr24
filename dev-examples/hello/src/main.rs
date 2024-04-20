@@ -1,10 +1,20 @@
 use std::todo;
 // For empty ID checking
+use std::net::{TcpListener, TcpStream};
 #[allow(unused_imports)]
 use std::{fmt::Error, io::ErrorKind, process::id};
 
-fn main() {
-    println!("Hello, world!");
+#[allow(unused_variables)]
+fn handle_client(stream: TcpStream) {
+    todo!();
+}
+
+fn main() -> std::io::Result<()> {
+    let listener = TcpListener::bind("127.0.0.1:80")?;
+    for stream in listener.incoming() {
+        handle_client(stream?);
+    }
+    Ok(())
 }
 
 #[allow(dead_code)]
