@@ -26,7 +26,7 @@ $ cargo add tokio --features full
 
 Basic server up and running from chapter 1:
 
-![Image of server](dev-examples/assets/hello-server.png)
+![Image of server](assets/hello-server.png)
 
 <!-- Checking -->
 Passes cargo clippy
