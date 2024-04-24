@@ -49,6 +49,20 @@ $ cargo clippy
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
 
+I kept having issues with rust-analyzer. I figured out that because I set up the repo with separate chapters as separate packages, I had to update the workspace linked projects to point to each project's Cargo.toml file. 
+
+```json
+{
+        "rust-analyzer.linkedProjects": [
+        "./hello/Cargo.toml",
+        "./ch2-web/Cargo.toml",
+        "./ch3-web/Cargo.toml",
+        ...
+    ]
+}
+
+```
+
 ## Acknowledgments
 
 Thanks to Bart Massey for teaching the course material.
