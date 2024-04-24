@@ -37,6 +37,14 @@ $ cargo clippy
     Finished dev [unoptimized + debuginfo] target(s) in 0.11s
 ```
 
+## Chapter 2
+
+<!-- Enter Output & process -->
+
+## Chapter 3
+
+<!-- Current -->
+
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
