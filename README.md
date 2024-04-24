@@ -47,6 +47,8 @@ Thanks to Bart Massey for teaching the course material.
 
 Thanks to the developers of tokio and axum.
 
+Thanks to the developers of mintlify for making doc comments easier to write.
+
 ## License
 
 This project is licensed with the [MIT license](./LICENSE).
@@ -64,3 +66,5 @@ https://github.com/pdx-cs-rust-web
 https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
 
 https://docs.rs/axum/latest/axum/
+
+[Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)
