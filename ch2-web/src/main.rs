@@ -1,4 +1,6 @@
 // Chapter 2 Examples -- creating a Question
+use std::io::{Error, ErrorKind};
+use std::str::FromStr;
 
 /// The `Question` struct represents a question with an ID, title, content, and optional tags.
 /// 
@@ -60,9 +62,25 @@ impl std::fmt::Display for QuestionId {
     }
 }
 
+/// The `impl FromStr for QuestionId { ... }` block is implementing the
+/// `FromStr` trait for the `QuestionId` struct. This trait allows for parsing a string into an instance
+/// of the specified type, in this case, `QuestionId`.
+impl FromStr for QuestionId {
+   type Err = std::io::Error;
+
+   fn from_str(id: &str) -> Result<Self, Self::Err> {
+       match id.is_empty() {
+           false => Ok(QuestionId(id.to_string())),
+           true => Err(
+             Error::new(ErrorKind::InvalidInput, "No id provided")
+           ),
+       }
+   }
+}
+
 fn main() {
     let question = Question::new(
-        QuestionId("1".to_string()),
+        QuestionId::from_str("1").expect("No id provided"),
         "First Question".to_string(),
         "Content of question".to_string(),
         Some(vec!("faq".to_string())),
