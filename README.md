@@ -19,6 +19,54 @@ Setting up tokio:
 $ cargo add tokio --features full
 ```
 
+### Repo
+
+```text
+.
+└── hello/ # Chapter 1
+    └── hello v0.1.0
+        ├── axum v0.7.5
+        │   [build-dependencies]
+        ├── reqwest v0.12.4
+        └── tokio v1.37.0
+├── ch2-web/
+    └── ch2-web v0.1.0
+        ├── axum v0.7.5
+        │   [build-dependencies]
+        └── tokio v1.37.0
+├── ch3-web/
+    └── ch3-web v0.1.0
+        ├── axum v0.7.5
+        │   [build-dependencies]
+        ├── reqwest v0.12.4
+        ├── serde v1.0.198
+        └── tokio v1.37.0
+├── assets/
+├── .gitignore
+├── error-notes.md
+├── README
+└── LICENSE
+```
+
+Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples. 
+
+I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead. 
+
+To make sure the rust-analyzer server could build my project(s) properly, I set the workspace ```settings.json``` to link the specific packages:
+
+```json
+{
+    "docwriter.custom.author": "Cordet Gula",
+    "docwriter.style": "RustDoc",
+    "rust-analyzer.linkedProjects": [
+        "./hello/Cargo.toml",
+        "./ch2-web/Cargo.toml",
+        "./ch3-web/Cargo.toml",
+        "./ch4-web/Cargo.toml"
+    ]
+}
+```
+
 <!-- Code Snippets -->
 ## Chapters
 
@@ -39,6 +87,17 @@ $ cargo clippy
 
 ## Chapter 2
 
+<!--Checking Cargo clippy-->
+Note: I updated my zsh format.
+
+Passes cargo clippy
+
+```zsh
+┌─(~/Desktop/git_local/rust_web/ch2-web)
+└─(01:41:15 on main ✹)──> cargo clippy
+    Finished dev [unoptimized + debuginfo] target(s) in 0.09s
+```
+
 <!-- Enter Output & process -->
 
 ## Chapter 3
@@ -50,20 +109,6 @@ $ cargo clippy
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
-
-I kept having issues with rust-analyzer. I figured out that because I set up the repo with separate chapters as separate packages, I had to update the workspace linked projects to point to each project's Cargo.toml file. 
-
-```json
-{
-        "rust-analyzer.linkedProjects": [
-        "./hello/Cargo.toml",
-        "./ch2-web/Cargo.toml",
-        "./ch3-web/Cargo.toml",
-        ...
-    ]
-}
-
-```
 
 ## Acknowledgments
 
