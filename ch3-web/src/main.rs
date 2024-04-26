@@ -8,6 +8,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use axum_macros::debug_handler;
 use headers::ContentType;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -100,7 +101,6 @@ enum ApiResponse {
 // To return a result, implement an error type
 enum ApiError {
     BadRequest,
-    Forbidden,
     Unauthorised,
     InternalServerError,
     InvalidInput,
@@ -117,6 +117,17 @@ impl IntoResponse for ApiResponse {
     /// The `into_response` function is returning a `Response` object based on the variant of the enum
     /// `Self`. Depending on the variant, it will create and return a response with the corresponding
     /// status code and data.
+    fn into_response(self) -> Response {
+        match self {
+            Self::OK => (StatusCode::OK).into_response(),
+            Self::Created => (StatusCode::CREATED).into_response(),
+            Self::JsonData(data) => (StatusCode::OK, Json(data)).into_response(),
+        }
+    }
+}
+
+impl IntoResponse for ApiError {
+    todo!("Implement response for Api Error");
     fn into_response(self) -> Response {
         match self {
             Self::OK => (StatusCode::OK).into_response(),

@@ -9,4 +9,4 @@ axum = "0.7.5"
 serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12.4", features = ["json"] }
 headers = "0.4.0"
-axum_macros = {path = "https://crates.io/crates/axum"}
+axum-macros = "0.4.1"
