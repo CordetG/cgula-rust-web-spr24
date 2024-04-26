@@ -43,6 +43,8 @@ $ cargo clippy
 
 ## Chapter 3
 
+## Chapter 4
+
 <!-- Current -->
 
 ## Error Notes
