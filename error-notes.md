@@ -49,7 +49,11 @@ The crate mentions the following:
 This error doesn’t tell you why your function doesn’t implement Handler. It’s possible to improve the error with the debug_handler proc-macro from the axum-macros crate.
 ```
 
-Once I added the macro `#[debug_handler]` it resolved the issue! Thank goodness for good documentation. 
+Once I added the macro `#[debug_handler]` -- and added the proper package version in the Cargo.toml -- I finally got a readable error. 
+
+Of course, it was something obvious that I overlooked -- I forgot to impl IntoResponse for the ApiError. Heh!
+
+Thank goodness for good documentation. 
 
 ## Miscellaneous Errors
 
