@@ -39,6 +39,18 @@ error: expected expression, found `.`
 
 ```
 
+## Chapter 3
+
+Kept getting Handler errors when trying to use `.get(get_questions)`. Luckily the axum crate mentioned this in the [Debugging handler type errors Section](https://docs.rs/axum/latest/axum/handler/index.html).
+
+The crate mentions the following:
+
+```text
+This error doesn’t tell you why your function doesn’t implement Handler. It’s possible to improve the error with the debug_handler proc-macro from the axum-macros crate.
+```
+
+Once I added the macro `#[debug_handler]` it resolved the issue! Thank goodness for good documentation. 
+
 ## Miscellaneous Errors
 
 ### Rust-analyzer
