@@ -1,14 +1,25 @@
-// Chapter 3 -- Continued examples from ch. 2
-
+#![allow(unused_imports,
+    dead_code,
+    unused_must_use,
+)]
+use axum::extract::{Extension, Path};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Json, Router,
+};
 use serde::Serialize;
-
+use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
+use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
+use std::todo;
 
 /// The `Question` struct represents a question with an ID, title, content, and optional tags.
-/// 
+///
 /// Properties:
-/// 
+///
 /// * `id`: The `id` field in the `Question` struct appears to be of type `QuestionId`.
 /// * `title`: The `title` property in the `Question` struct represents the title of the question. It is
 /// of type `String` and stores the title of the question being asked.
@@ -69,24 +80,82 @@ impl std::fmt::Display for QuestionId {
 /// `FromStr` trait for the `QuestionId` struct. This trait allows for parsing a string into an instance
 /// of the specified type, in this case, `QuestionId`.
 impl FromStr for QuestionId {
-   type Err = std::io::Error;
+    type Err = std::io::Error;
 
-   fn from_str(id: &str) -> Result<Self, Self::Err> {
-       match id.is_empty() {
-           false => Ok(QuestionId(id.to_string())),
-           true => Err(
-             Error::new(ErrorKind::InvalidInput, "No id provided")
-           ),
-       }
-   }
+    fn from_str(id: &str) -> Result<Self, Self::Err> {
+        match id.is_empty() {
+            false => Ok(QuestionId(id.to_string())),
+            true => Err(Error::new(ErrorKind::InvalidInput, "No id provided")),
+        }
+    }
 }
 
-fn main() {
+// Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
+enum ApiResponse {
+    OK,
+    Created,
+    JsonData(Question),
+}
+
+// To return a result, implement an error type
+enum ApiError {
+    BadRequest,
+    Forbidden,
+    Unauthorised,
+    InternalServerError,
+    InvalidInput,
+}
+
+impl IntoResponse for ApiResponse {
+    fn into_response(self) -> Response {
+        match self {
+            Self::OK => (StatusCode::OK).into_response(),
+            Self::Created => (StatusCode::CREATED).into_response(),
+            Self::JsonData(data) => (StatusCode::OK, Json(data)).into_response(),
+        }
+    }
+}
+
+async fn get_questions() -> Result<ApiResponse, ApiError> {
     let question = Question::new(
         QuestionId::from_str("1").expect("No id provided"),
         "First Question".to_string(),
         "Content of question".to_string(),
-        Some(vec!("faq".to_string())),
+        Some(vec!["faq".to_string()]),
+    );
+    match question.id.0.parse::<i32>() {
+        Err(_) => Err(ApiError::InvalidInput),
+        Ok(_) => Ok(ApiResponse::JsonData(question)),
+    }
+}
+
+async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
+    let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
+    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3000);
+    let http_server: Router = Router::new().route("/", get(|| async { "Hello, World!" }));
+    // run with hyper, listening globally on port 3000
+    let listener: tokio::net::TcpListener =
+        tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    axum::serve(listener, http_server).await.unwrap();
+
+    // reqwest with async/await
+    let resp: HashMap<String, String> = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .json::<HashMap<String, String>>()
+        .await?;
+    println!("{:#?}", resp);
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() {
+    let question = Question::new(
+        QuestionId::from_str("1").expect("No id provided"),
+        "First Question".to_string(),
+        "Content of question".to_string(),
+        Some(vec!["faq".to_string()]),
     );
     println!("{:?}", question);
- }
+
+    init_router().await;
+}
