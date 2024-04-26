@@ -1,13 +1,10 @@
+use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::todo;
-use std::net::{TcpStream, Ipv4Addr, SocketAddrV4};
 // For empty ID checking
+use axum::{routing::get, Router};
+use std::collections::HashMap;
 #[allow(unused_imports)]
 use std::{fmt::Error, io::ErrorKind, process::id};
-use std::collections::HashMap;
-use axum::{
-    routing::get,
-    Router,
-};
 
 #[allow(unused_variables)]
 #[allow(dead_code)]
@@ -17,7 +14,7 @@ fn handle_client(stream: TcpStream) {
 
 // ch_01/minimal_reqwest/src/main.rs
 // https://github.com/Rust-Web-Development/code/tree/main/ch_01/minimal_reqwest
- 
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let localhost = Ipv4Addr::new(127, 0, 0, 1);
