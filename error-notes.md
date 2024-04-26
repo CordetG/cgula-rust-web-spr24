@@ -38,3 +38,29 @@ error: expected expression, found `.`
    |         ^ expected expression
 
 ```
+
+## Miscellaneous Errors
+
+### Rust-analyzer
+
+I kept having issues with rust-analyzer. I figured out that because I set up the repo with separate chapters as separate packages, I had to update the workspace linked projects to point to each project's Cargo.toml file.
+
+---
+
+### Trunk
+
+Trunk is a rather handy extension for VS Code that includes lints (such as rustfmt) and various other tools all in one place. I used it briefly, but I think it had issues with some of my other settings. For example, 'Prettier' would override `rustfmt` and even after disabling it, I would get `rustfmt` errors that I couldn't pin down or ever resolve.
+
+I uninstalled it for now, but I think I need to configure `rust-analyzer` and `trunk` settings to play nicely with each other.
+
+---
+
+### Terminal
+
+When I officially switched from `bash` to `zsh` I kept getting errors with cargo and rustup commands. I noticed my path in bash included the following command:
+
+```vim
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+To confirm: [This Stack Overflow issue](https://stackoverflow.com/questions/67656028/rustup-gives-command-not-found-error-with-zsh-even-after-installing-with-brew) confirmed. Once I updated the path, everything worked fine.
