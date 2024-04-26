@@ -15,4 +15,5 @@ Cargo.lock
 
 # IDE Files
 .vscode/
+.vscode/*
 mint.json
