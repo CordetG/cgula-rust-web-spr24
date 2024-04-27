@@ -9,14 +9,15 @@ use axum::{
     Json, Router,
 };
 use axum_macros::debug_handler;
+
 use headers::ContentType;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+extern crate tracing;
+
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
-use std::todo;
-extern crate tracing;
 
 /// The `Question` struct represents a question with an ID, title, content, and optional tags.
 ///
@@ -39,7 +40,7 @@ pub struct Question {
     tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Hash)]
 struct QuestionId(String);
 
 /// The `impl Question { ... }` block is implementing a method named `new` for the
@@ -103,6 +104,29 @@ impl FromStr for QuestionId {
 /// based on their unique identifiers.
 struct Store {
     questions: HashMap<QuestionId, Question>,
+}
+
+impl Store {
+    fn new() -> Self {
+        Store {
+            questions: HashMap::new(),
+        }
+    }
+
+    fn init(self) -> Self {
+        let question: Question = Question::new(
+            QuestionId::from_str("1").expect("Id not set"),
+            "How?".to_string(),
+            "Please help!".to_string(),
+            Some(vec!["general".to_string()]),
+        );
+        self.add_question(question)
+    }
+
+    fn add_question(mut self, question: Question) -> Self {
+        self.questions.insert(question.id.clone(), question);
+        self
+    }
 }
 
 fn main() {
