@@ -65,6 +65,23 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 
 I realized that my hello/ package used port 3000, so I changed the port to 3080 and that fixed the issue.
 
+## Chapter 4
+
+```zsh
+# Error occured when implimenting fn init() -> HashMap {...} from the book
+missing generics for struct `std::collections::HashMap`
+expected at least 2 generic arguments
+```
+
+Fix: Changed the return type to include the generic arguments.
+
+```rust
+    fn init() -> HashMap<QuestionId, Question> {
+        let file: &str = include_str!("../questions.json");
+        serde_json::from_str(file).expect("can't read questions.json")
+    }
+```
+
 ## Miscellaneous Errors
 
 ### Rust-analyzer
