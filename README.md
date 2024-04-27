@@ -1,4 +1,4 @@
-# Rust Web Example
+# Rust Web Examples
 
 Cordet Gula  
 CS510 Rust Web Dev SPR 2024  
@@ -7,16 +7,29 @@ Professor: Bart Massey
 
 ## About
 
-Rust Web Example is a course repo dedicated to Rust Web Development. The focus of this repo will be demonstrating web dev skills [*in rust*], such as providing a web service, REST API, backend, frontend, and more.  
+Rust Web Example is a course repo dedicated to Rust Web Development. The focus of this repo will be demonstrating web dev skills [*in rust*], such as providing a web service, REST API, backend, frontend, and more. 
+
+## Assignments
+
+To make access to the specific assignments easier, I made this guide to point to the corresponding package in repo.
+
+Chapter 4: Implement a RESTful API  
+['Get The REST Up' package](./ch4-web)  
+[Assignment README documented section](#chapter-4)
+
+## <!-- End of Get-the-REST-Up -->
 
 ## Setup
 
-<!-- Setup Section -->
-
-Setting up tokio:
-
 ```zsh
+# Setup Chapter as Package
+$ Cargo new ch*-web
+
+# Setting up tokio:
 $ cargo add tokio --features full
+
+# Setting up header
+$ cargo add axum-extra -F typed-header  
 ```
 
 ### Repo
@@ -41,6 +54,8 @@ $ cargo add tokio --features full
         ├── reqwest v0.12.4
         ├── serde v1.0.198
         └── tokio v1.37.0
+├── ch4-web/
+    └── ch4-web v0.1.0
 ├── assets/
 ├── .gitignore
 ├── error-notes.md
