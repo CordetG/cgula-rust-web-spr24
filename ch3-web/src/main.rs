@@ -100,10 +100,9 @@ enum ApiResponse {
 
 // To return a result, implement an error type
 enum ApiError {
-    BadRequest,
-    Unauthorised,
-    InternalServerError,
-    InvalidInput,
+    NotFound,
+    NotImplemented,
+    Failed,
 }
 
 /// The `impl IntoResponse for ApiResponse` block is implementing the `IntoResponse` trait for the
@@ -127,12 +126,15 @@ impl IntoResponse for ApiResponse {
 }
 
 impl IntoResponse for ApiError {
-    todo!("Implement response for Api Error");
     fn into_response(self) -> Response {
         match self {
-            Self::OK => (StatusCode::OK).into_response(),
-            Self::Created => (StatusCode::CREATED).into_response(),
-            Self::JsonData(data) => (StatusCode::OK, Json(data)).into_response(),
+            Self::NotFound => (StatusCode::NOT_FOUND, "404 Not Found").into_response(),
+            Self::NotImplemented => {
+                (StatusCode::NOT_IMPLEMENTED, "501 Not Implemented").into_response()
+            }
+            Self::Failed => {
+                (StatusCode::EXPECTATION_FAILED, "417 Expectation Failed").into_response()
+            }
         }
     }
 }
@@ -155,7 +157,7 @@ async fn get_questions() -> Result<ApiResponse, ApiError> {
         vec!["faq".to_string()],
     );
     match question.id.0.parse::<i32>() {
-        Err(_) => Err(ApiError::InvalidInput),
+        Err(_) => Err(ApiError::NotFound),
         Ok(_) => Ok(ApiResponse::JsonData(question)),
     }
 }
