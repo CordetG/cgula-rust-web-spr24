@@ -1,0 +1,16 @@
+[package]
+name = "ch4-web"
+version = "0.1.0"
+edition = "2021"
+# Do not publish to crates.io
+publish = false
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = "0.7.5"
+serde = { version = "1.0", features = ["derive"] }
+reqwest = { version = "0.12.4", features = ["json"] }
+headers = "0.4.0"
+axum-macros = "0.4.1"
+tracing = { version = "0.1.40", features = ["async-await"] }
+axum-extra = { version = "0.9.3", features = ["typed-header"] }
