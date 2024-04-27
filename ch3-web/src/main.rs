@@ -125,7 +125,17 @@ impl IntoResponse for ApiResponse {
     }
 }
 
+/// The `impl IntoResponse for ApiError` block is implementing the `IntoResponse` trait for the
+/// `ApiError` enum. This trait allows instances of the `ApiError` enum to be converted into an HTTP
+/// response.
 impl IntoResponse for ApiError {
+    /// The function `into_response` converts enum variants into corresponding HTTP responses.
+    ///
+    /// Returns:
+    ///
+    /// A `Response` object is being returned based on the variant of the enum `self`. The
+    /// `into_response` method is being called on the tuple `(StatusCode, &str)` to convert it into a
+    /// `Response` object.
     fn into_response(self) -> Response {
         match self {
             Self::NotFound => (StatusCode::NOT_FOUND, "404 Not Found").into_response(),
