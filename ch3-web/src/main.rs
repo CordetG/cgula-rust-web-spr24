@@ -16,6 +16,7 @@ use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::todo;
+extern crate tracing;
 
 /// The `Question` struct represents a question with an ID, title, content, and optional tags.
 ///
@@ -35,7 +36,7 @@ pub struct Question {
     id: QuestionId,
     title: String,
     content: String,
-    tags: Vec<String>,
+    tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -45,7 +46,7 @@ struct QuestionId(String);
 /// `Question` struct. This method serves as a constructor function for creating new instances of the
 /// `Question` struct.
 impl Question {
-    fn new(id: QuestionId, title: String, content: String, tags: Vec<String>) -> Self {
+    fn new(id: QuestionId, title: String, content: String, tags: Option<Vec<String>>) -> Self {
         Question {
             id,
             title,
@@ -164,7 +165,7 @@ async fn get_questions() -> Result<ApiResponse, ApiError> {
         QuestionId::from_str("1").expect("No id provided"),
         "First Question".to_string(),
         "Content of question".to_string(),
-        vec!["faq".to_string()],
+        Some(vec!["faq".to_string()]),
     );
     match question.id.0.parse::<i32>() {
         Err(_) => Err(ApiError::NotFound),
@@ -183,13 +184,13 @@ async fn get_questions() -> Result<ApiResponse, ApiError> {
 /// trait in case of any errors occurring during the execution of the function.
 async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
     let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
-    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3000);
+    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3080);
 
     let http_server: Router = Router::new().route("/", get(get_questions));
     // run with hyper, listening globally on port 3000
     let listener: tokio::net::TcpListener =
         tokio::net::TcpListener::bind(socket_addr).await.unwrap();
-
+    tracing::debug!("serving {}", listener.local_addr().unwrap());
     axum::serve(listener, http_server).await.unwrap();
 
     // reqwest with async/await
