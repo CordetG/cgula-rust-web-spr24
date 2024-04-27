@@ -98,9 +98,13 @@ Passes cargo clippy
     Finished dev [unoptimized + debuginfo] target(s) in 0.09s
 ```
 
-<!-- Enter Output & process -->
-
 ## Chapter 3
+
+Passes `cargo clippy`
+
+The web-server on port 3080 is working as expected!
+
+![Screenshot of web-server](./assets/ch3-json-response.png)
 
 ## Chapter 4
 
