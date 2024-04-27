@@ -15,7 +15,9 @@ To make access to the specific assignments easier, I made this guide to point to
 
 Chapter 4: Implement a RESTful API  
 ['Get The REST Up' package](./ch4-web)  
-[Assignment README documented section](#chapter-4)
+[Assignment README documented section](#chapter-4)  
+
+To see the server working from chapter 3 for a question: see [ch3-web](#chapter-3)
 
 ## <!-- End of Get-the-REST-Up -->
 
@@ -128,6 +130,20 @@ The web-server on port 3080 is working as expected!
 ![Screenshot of web-server](./assets/ch3-json-response.png)
 
 ## Chapter 4
+
+Passes `cargo clippy`
+
+```zsh
+┌─(~/Desktop/git_local/rust_web/ch4-web)
+└─(23:13:18 on main)──> cargo clippy
+    Finished dev [unoptimized + debuginfo] target(s) in 0.11s
+```
+
+TODO:
+
+Having issues understanding how to convert warp::filter to axum. From what I understand, axum uses a service instead of a filter.
+
+But I'm still working on this...
 
 <!-- Current -->
 
