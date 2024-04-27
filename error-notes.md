@@ -55,6 +55,16 @@ Of course, it was something obvious that I overlooked -- I forgot to impl IntoRe
 
 Thank goodness for good documentation. 
 
+After implementing ApiError:
+
+```zsh
+thread 'main' panicked at src/main.rs:190:58:
+called `Result::unwrap()` on an `Err` value: Os { code: 98, kind: AddrInUse, message: "Address already in use" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+I realized that my hello/ package used port 3000, so I changed the port to 3080 and that fixed the issue.
+
 ## Miscellaneous Errors
 
 ### Rust-analyzer
