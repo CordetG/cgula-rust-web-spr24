@@ -102,6 +102,12 @@ Passes cargo clippy
 
 Passes `cargo clippy`
 
+```zsh
+┌─(~/Desktop/git_local/rust_web/ch3-web)
+└─(19:27:49 on main)──> cargo clippy
+    Finished dev [unoptimized + debuginfo] target(s) in 0.11s
+```
+
 The web-server on port 3080 is working as expected!
 
 ![Screenshot of web-server](./assets/ch3-json-response.png)
