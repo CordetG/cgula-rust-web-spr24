@@ -93,14 +93,14 @@ impl FromStr for QuestionId {
 }
 
 // Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
-enum ApiResponse {
+pub enum ApiResponse {
     OK,
     Created,
     JsonData(Question),
 }
 
 // To return a result, implement an error type
-enum ApiError {
+pub enum ApiError {
     NotFound,
     NotImplemented,
     Failed,
@@ -186,8 +186,8 @@ async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
     let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
     let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3080);
 
-    let http_server: Router = Router::new().route("/", get(get_questions));
-    // run with hyper, listening globally on port 3000
+    let http_server: Router = Router::new().route("/questions", get(get_questions));
+    // run with hyper, listening globally on port 3080
     let listener: tokio::net::TcpListener =
         tokio::net::TcpListener::bind(socket_addr).await.unwrap();
     tracing::debug!("serving {}", listener.local_addr().unwrap());
