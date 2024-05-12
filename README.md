@@ -245,6 +245,12 @@ https://docs.rs/axum/latest/axum/
 
 [Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)
 
+[Docker & Rust](https://docs.docker.com/language/rust/?uuid=2475bfc7-4dda-4e0b-9eb8-333f3d77c9c4%0A)
+
+[Docker Hub Images](https://hub.docker.com/?utm_source=docker4mac_4.29.0&utm_medium=hub&utm_campaign=referral&uuid=2475bfc7-4dda-4e0b-9eb8-333f3d77c9c4%0A)
+
+[Docker Install: Debian](https://docs.docker.com/desktop/install/debian/)
+
 ## License
 
 This project is licensed with the [MIT license](./LICENSE).
