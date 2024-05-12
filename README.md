@@ -17,19 +17,19 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 
 + [Assignments](#assignments)
 + [Setup](#setup)
-  + [Repo](#repo)
+    + [Repo](#repo)
 + [Chapters](#chapters)
-  + [Chapter 1](#chapter-1)
-  + [Chapter 2](#chapter-2)
-  + [Chapter 3](#chapter-3)
-  + [Chapter 4](#chapter-4)
-  + [Chapter 5](#chapter-5)
-  + [Chapter 6](#chapter-6)
-  + [Chapter 7](#chapter-7)
-  + [Chapter 8](#chapter-8)
-  + [Chapter 9](#chapter-9)
-  + [Chapter 10](#chapter-10)
-  + [Chapter 11](#chapter-11)
+    + [Chapter 1](#chapter-1)
+    + [Chapter 2](#chapter-2)
+    + [Chapter 3](#chapter-3)
+    + [Chapter 4](#chapter-4)
+    + [Chapter 5](#chapter-5)
+    + [Chapter 6](#chapter-6)
+    + [Chapter 7](#chapter-7)
+    + [Chapter 8](#chapter-8)
+    + [Chapter 9](#chapter-9)
+    + [Chapter 10](#chapter-10)
+    + [Chapter 11](#chapter-11)
 + [Error Notes](#error-notes)
 + [Acknowledgments](#acknowledgments)
 + [References](#references)
@@ -53,21 +53,31 @@ To see the server working from chapter 3 for a question: see [ch3-web](#chapter-
 
 ## Setup
 
-```zsh
+```sh
 # Setup Chapter as Package
-$ cargo new ch*-web
+──> cargo new ch*-web
 
 # Setting up tokio:
-$ cargo add tokio --features full
+──> cargo add tokio --features full
 
 # Setting up header
-$ cargo add axum-extra -F typed-header
+──> cargo add axum-extra -F typed-header
 
 # Generate cargo docs
-$ cargo doc --open
+──> cargo doc --open
+
+# In package: Check settings
+──> cargo verify-project
 ```
 
 ### Repo
+
+Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples.  
+
+I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead.
+
+<details>
+<summary>See: Repo setup</summary>
 
 ```text
 main branch
@@ -100,11 +110,13 @@ main branch
 └── LICENSE
 ```
 
-Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples. 
-
-I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead. 
+</details> 
+</br>
 
 To make sure the rust-analyzer server could build my project(s) properly, I set the workspace ```settings.json``` to link the specific packages:
+
+<details>
+<summary>See: Rust-Analyzer Settings</summary>
 
 ```json
 {
@@ -125,6 +137,8 @@ To make sure the rust-analyzer server could build my project(s) properly, I set 
     ]
 }
 ```
+
+</details> 
 
 <!-- Chapter Reports -->
 ## Chapters
