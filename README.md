@@ -1,13 +1,43 @@
-# Rust Web Examples
+# Rust Web Examples<!-- omit from toc -->
 
 Cordet Gula  
 CS510 Rust Web Dev SPR 2024  
 MCECS  
 Professor: Bart Massey
 
-## About
+## About<!-- omit from toc -->
 
 Rust Web Example is a course repo dedicated to Rust Web Development. The focus of this repo will be demonstrating web dev skills [*in rust*], such as providing a web service, REST API, backend, frontend, and more. 
+
+## Table of Contents<!-- omit from toc -->
+
+<details>
+<summary>Rust Web Examples</summary>
+<!-- blank line-->
+
++ [Assignments](#assignments)
++ [Setup](#setup)
+  + [Repo](#repo)
++ [Chapters](#chapters)
+  + [Chapter 1](#chapter-1)
+  + [Chapter 2](#chapter-2)
+  + [Chapter 3](#chapter-3)
+  + [Chapter 4](#chapter-4)
+  + [Chapter 5](#chapter-5)
+  + [Chapter 6](#chapter-6)
+  + [Chapter 7](#chapter-7)
+  + [Chapter 8](#chapter-8)
+  + [Chapter 9](#chapter-9)
+  + [Chapter 10](#chapter-10)
+  + [Chapter 11](#chapter-11)
++ [Error Notes](#error-notes)
++ [Acknowledgments](#acknowledgments)
++ [References](#references)
++ [License](#license)
+
+</details>
+
+<!-- End TOC -->
 
 ## Assignments
 
@@ -19,45 +49,50 @@ Chapter 4: Implement a RESTful API
 
 To see the server working from chapter 3 for a question: see [ch3-web](#chapter-3)
 
-## <!-- End of Get-the-REST-Up -->
+## <!-- End of Get-the-REST-Up --><!-- omit from toc -->
 
 ## Setup
 
 ```zsh
 # Setup Chapter as Package
-$ Cargo new ch*-web
+$ cargo new ch*-web
 
 # Setting up tokio:
 $ cargo add tokio --features full
 
 # Setting up header
-$ cargo add axum-extra -F typed-header  
+$ cargo add axum-extra -F typed-header
+
+# Generate cargo docs
+$ cargo doc --open
 ```
 
 ### Repo
 
 ```text
-.
+main branch
 └── hello/ # Chapter 1
     └── hello v0.1.0
-        ├── axum v0.7.5
-        │   [build-dependencies]
-        ├── reqwest v0.12.4
-        └── tokio v1.37.0
 ├── ch2-web/
     └── ch2-web v0.1.0
-        ├── axum v0.7.5
-        │   [build-dependencies]
-        └── tokio v1.37.0
 ├── ch3-web/
     └── ch3-web v0.1.0
-        ├── axum v0.7.5
-        │   [build-dependencies]
-        ├── reqwest v0.12.4
-        ├── serde v1.0.198
-        └── tokio v1.37.0
 ├── ch4-web/
     └── ch4-web v0.1.0
+├── ch5-web/
+    └── ch5-web v0.1.0
+├── ch6-web/
+    └── ch6-web v0.1.0
+├── ch7-web/
+    └── ch7-web v0.1.0
+├── ch8-web/
+    └── ch8-web v0.1.0
+├── ch9-web/
+    └── ch9-web v0.1.0
+├── ch10-web/
+    └── ch10-web v0.1.0
+├── ch11-web/
+    └── ch11-web v0.1.0
 ├── assets/
 ├── .gitignore
 ├── error-notes.md
@@ -79,12 +114,19 @@ To make sure the rust-analyzer server could build my project(s) properly, I set 
         "./hello/Cargo.toml",
         "./ch2-web/Cargo.toml",
         "./ch3-web/Cargo.toml",
-        "./ch4-web/Cargo.toml"
+        "./ch4-web/Cargo.toml",
+        "./ch5-web/Cargo.toml",
+        "./ch6-web/Cargo.toml",
+        "./ch7-web/Cargo.toml",
+        "./ch8-web/Cargo.toml",
+        "./ch9-web/Cargo.toml",
+        "./ch10-web/Cargo.toml",
+        "./ch11-web/Cargo.toml"
     ]
 }
 ```
 
-<!-- Code Snippets -->
+<!-- Chapter Reports -->
 ## Chapters
 
 ### Chapter 1
@@ -102,7 +144,7 @@ $ cargo clippy
     Finished dev [unoptimized + debuginfo] target(s) in 0.11s
 ```
 
-## Chapter 2
+### Chapter 2
 
 <!--Checking Cargo clippy-->
 Note: I updated my zsh format.
@@ -115,7 +157,7 @@ Passes cargo clippy
     Finished dev [unoptimized + debuginfo] target(s) in 0.09s
 ```
 
-## Chapter 3
+### Chapter 3
 
 Passes `cargo clippy`
 
@@ -129,7 +171,7 @@ The web-server on port 3080 is working as expected!
 
 ![Screenshot of web-server](./assets/ch3-json-response.png)
 
-## Chapter 4
+### Chapter 4
 
 Passes `cargo clippy`
 
@@ -147,6 +189,20 @@ But I'm still working on this...
 
 <!-- Current -->
 
+### Chapter 5
+
+### Chapter 6
+
+### Chapter 7
+
+### Chapter 8
+
+### Chapter 9
+
+### Chapter 10
+
+### Chapter 11
+
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
@@ -158,10 +214,6 @@ Thanks to Bart Massey for teaching the course material.
 Thanks to the developers of tokio and axum.
 
 Thanks to the developers of mintlify for making doc comments easier to write.
-
-## License
-
-This project is licensed with the [MIT license](./LICENSE).
 
 ## References  
 
@@ -178,3 +230,12 @@ https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
 https://docs.rs/axum/latest/axum/
 
 [Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)
+
+## License
+
+This project is licensed with the [MIT license](./LICENSE).
+
+---
+<!-- Link to top of README -->
+
+[&uarr; Back to Top](README.md#rust-web-examples)
