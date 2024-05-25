@@ -3,13 +3,16 @@
 #![allow(unused_imports, dead_code, unused_must_use, unused_variables)]
 use axum::extract::{self, path, Extension, Path, State};
 use axum::{
-    http::StatusCode,
+    http::{HeaderValue, Method, StatusCode},
     response::{IntoResponse, Response},
     routing::{any, get, post},
     Json, Router,
 };
+
 use axum_macros::debug_handler;
 use tower_http::compression::CompressionLayer;
+use tower_http::cors::CorsLayer;
+use tower_http::follow_redirect::policy::PolicyExt;
 use tower_http::services::{ServeDir, ServeFile};
 
 use headers::ContentType;
@@ -20,6 +23,7 @@ use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
+use std::sync::Arc;
 
 /// The `Question` struct represents a question with an ID, title, content, and optional tags.
 ///
@@ -164,6 +168,11 @@ impl IntoResponse for ApiError {
 /// struct. If the parsing fails, it will return an INvalidInput ApiError.
 #[debug_handler]
 async fn get_questions() -> Result<ApiResponse, ApiError> {
+    /*match params.get("start") {
+        Some(start) => println!("{}", start),
+        None => println!("No start value"),
+    }*/
+
     let question: Question = Question::new(
         QuestionId::from_str("1").expect("No id provided"),
         "First Question".to_string(),
@@ -190,7 +199,8 @@ async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
     let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3040);
 
     let http_server: Router = Router::new().route("/questions", get(get_questions));
-    // run with hyper, listening globally on port 3080
+
+    // run with hyper, listening globally on port 3040
     let listener: tokio::net::TcpListener =
         tokio::net::TcpListener::bind(socket_addr).await.unwrap();
     tracing::debug!("serving {}", listener.local_addr().unwrap());
@@ -220,19 +230,56 @@ struct Store {
 }
 
 impl Store {
+    /// The function `new` initializes a `Store` struct with questions initialized using the `init` method.
+    ///
+    /// Returns:
+    ///
+    /// An instance of the `Store` struct is being returned.
     fn new() -> Self {
         Store {
             questions: Self::init(),
         }
     }
 
+    /// The `init` function reads questions from a JSON file and returns them as a HashMap.
+    ///
+    /// Returns:
+    ///
+    /// A `HashMap` containing `QuestionId` as keys and `Question` as values is being returned.
     fn init() -> HashMap<QuestionId, Question> {
         let file: &str = include_str!("../questions.json");
         serde_json::from_str(file).expect("can't read questions.json")
     }
 }
 
+// main function
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let store = Store::new();
+    let store: Arc<Store> = Arc::new(store);
+
+    let store_filter: Extension<Arc<Store>> = axum::extract::Extension(store.clone());
+
+    let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
+    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3040);
+
+    let http_server: Router = Router::new().route("/questions", get(get_questions)).layer(
+        CorsLayer::new()
+            .allow_origin("http://localhost:3040".parse::<HeaderValue>().unwrap())
+            .allow_methods([Method::GET]),
+    );
+
+    // run with hyper, listening globally on port 3040
+    let listener: tokio::net::TcpListener =
+        tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    tracing::debug!("serving {}", listener.local_addr().unwrap());
+    axum::serve(listener, http_server).await.unwrap();
+
+    // reqwest with async/await
+    let resp: HashMap<String, String> = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .json::<HashMap<String, String>>()
+        .await?;
+    println!("{:#?}", resp);
+    Ok(())
 }
