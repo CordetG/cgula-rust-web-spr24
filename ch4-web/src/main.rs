@@ -25,137 +25,12 @@ use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
 
-/// The `Question` struct represents a question with an ID, title, content, and optional tags.
-///
-/// Properties:
-///
-/// * `id`: The `id` field in the `Question` struct appears to be of type `QuestionId`.
-/// * `title`: The `title` property in the `Question` struct represents the title of the question. It is
-/// of type `String` and stores the title of the question being asked.
-/// * `content`: The `content` property in the `Question` struct represents the main text of the
-/// question being asked. It typically contains the details, description, or context related to the
-/// question being posed.
-/// * `tags`: The `tags` field in the `Question` struct is an `Option` that contains a vector of
-/// strings. This means that the `tags` field can either be `Some` with a vector of strings or `None`.
-/// It allows for flexibility in cases where a question may or may not have a value.
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Question {
-    id: QuestionId,
-    title: String,
-    content: String,
-    tags: Option<Vec<String>>,
-}
-
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
-struct QuestionId(String);
-
-/// The `impl Question { ... }` block is implementing a method named `new` for the
-/// `Question` struct. This method serves as a constructor function for creating new instances of the
-/// `Question` struct.
-impl Question {
-    fn new(id: QuestionId, title: String, content: String, tags: Option<Vec<String>>) -> Self {
-        Question {
-            id,
-            title,
-            content,
-            tags,
-        }
-    }
-}
-
-/// The `impl std::fmt::Display for Question { ... }` block is implementing the `Display` trait for the
-/// `Question` struct. By implementing this trait, you are specifying how instances of the `Question`
-/// struct should be formatted when using formatting macros like `println!` or `format!`.
-impl std::fmt::Display for Question {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(
-            f,
-            "{}, title: {}, content: {}, tags: {:?}",
-            self.id, self.title, self.content, self.tags
-        )
-    }
-}
-
-/// The `impl std::fmt::Display for QuestionId { ... }` block is implementing the `Display` trait for
-/// the `QuestionId` struct. By implementing this trait, you are specifying how instances of the
-/// `QuestionId` struct should be formatted when using formatting macros like `println!` or `format!`.
-impl std::fmt::Display for QuestionId {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "id: {}", self.0)
-    }
-}
-
-/// The `impl FromStr for QuestionId { ... }` block is implementing the
-/// `FromStr` trait for the `QuestionId` struct. This trait allows for parsing a string into an instance
-/// of the specified type, in this case, `QuestionId`.
-impl FromStr for QuestionId {
-    type Err = std::io::Error;
-
-    fn from_str(id: &str) -> Result<Self, Self::Err> {
-        match id.is_empty() {
-            false => Ok(QuestionId(id.to_string())),
-            true => Err(Error::new(ErrorKind::InvalidInput, "No id provided")),
-        }
-    }
-}
-
-// Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
-pub enum ApiResponse {
-    OK,
-    Created,
-    JsonData(Question),
-}
-
-// To return a result, implement an error type
-pub enum ApiError {
-    NotFound,
-    NotImplemented,
-    Failed,
-}
-
-/// The `impl IntoResponse for ApiResponse` block is implementing the `IntoResponse` trait for the
-/// `ApiResponse` enum. This trait allows instances of the `ApiResponse` enum to be converted into an
-/// HTTP response.
-impl IntoResponse for ApiResponse {
-    /// The function `into_response` converts an enum variant into a corresponding HTTP response.
-    ///
-    /// Returns:
-    ///
-    /// The `into_response` function is returning a `Response` object based on the variant of the enum
-    /// `Self`. Depending on the variant, it will create and return a response with the corresponding
-    /// status code and data.
-    fn into_response(self) -> Response {
-        match self {
-            Self::OK => (StatusCode::OK).into_response(),
-            Self::Created => (StatusCode::CREATED).into_response(),
-            Self::JsonData(data) => (StatusCode::OK, Json(data)).into_response(),
-        }
-    }
-}
-
-/// The `impl IntoResponse for ApiError` block is implementing the `IntoResponse` trait for the
-/// `ApiError` enum. This trait allows instances of the `ApiError` enum to be converted into an HTTP
-/// response.
-impl IntoResponse for ApiError {
-    /// The function `into_response` converts enum variants into corresponding HTTP responses.
-    ///
-    /// Returns:
-    ///
-    /// A `Response` object is being returned based on the variant of the enum `self`. The
-    /// `into_response` method is being called on the tuple `(StatusCode, &str)` to convert it into a
-    /// `Response` object.
-    fn into_response(self) -> Response {
-        match self {
-            Self::NotFound => (StatusCode::NOT_FOUND, "404 Not Found").into_response(),
-            Self::NotImplemented => {
-                (StatusCode::NOT_IMPLEMENTED, "501 Not Implemented").into_response()
-            }
-            Self::Failed => {
-                (StatusCode::EXPECTATION_FAILED, "417 Expectation Failed").into_response()
-            }
-        }
-    }
-}
+mod handler;
+pub mod question;
+pub mod store;
+use crate::handler::*;
+use crate::question::*;
+use store::*;
 
 /// The function `get_questions` asynchronously retrieves a question and returns a result indicating
 /// success or failure.
@@ -213,43 +88,6 @@ async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("{:#?}", resp);
     Ok(())
-}
-
-// Section 4.2 -- Creating a 'store' for the questions
-/// The `Store` struct contains a collection of questions stored in a HashMap with `QuestionId` keys and
-/// `Question` values.
-///
-/// Properties:
-///
-/// * `questions`: The `questions` property in the `Store` struct is a HashMap that stores `Question`
-/// objects with a key of type `QuestionId`. This allows you to efficiently store and retrieve questions
-/// based on their unique identifiers.
-#[derive(Clone)]
-struct Store {
-    questions: HashMap<QuestionId, Question>,
-}
-
-impl Store {
-    /// The function `new` initializes a `Store` struct with questions initialized using the `init` method.
-    ///
-    /// Returns:
-    ///
-    /// An instance of the `Store` struct is being returned.
-    fn new() -> Self {
-        Store {
-            questions: Self::init(),
-        }
-    }
-
-    /// The `init` function reads questions from a JSON file and returns them as a HashMap.
-    ///
-    /// Returns:
-    ///
-    /// A `HashMap` containing `QuestionId` as keys and `Question` as values is being returned.
-    fn init() -> HashMap<QuestionId, Question> {
-        let file: &str = include_str!("../questions.json");
-        serde_json::from_str(file).expect("can't read questions.json")
-    }
 }
 
 // main function
