@@ -243,6 +243,10 @@ The 3 utoipa crates above were not at the latest version, so I went ahead and up
 
 Running `cargo check` ran successfully so I can infer that the updates were compatible.
 
+:bulb: **Ideas:**
+
++ I saw that reqwest has a  `auth` package -- making a note here to review later.
+
 ### Chapter 10
 
 ### Chapter 11
