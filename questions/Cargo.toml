@@ -1,0 +1,27 @@
+[package]
+name = "questions"
+version = "0.1.2"
+edition = "2021"
+# Do not publish to crates.io
+publish = false
+
+[dependencies]
+askama = { version = "0.12.1", features = ["with-axum"] }
+askama_axum = "0.4.0"
+axum = "0.7.5"
+axum-extra = { version = "0.9.3", features = ["typed-header"] }
+clap = { version = "4.5.4", features = ["derive", "env", "unicode", "wrap_help", "cargo"] }
+jsonwebtoken = "9.3.0"
+serde = { version = "1.0.197", features = ["derive", "serde_derive"] }
+serde_json = "1.0.116"
+sqlx = { version = "0.7.4", features = ["postgres", "migrate", "runtime-tokio-rustls"] }
+thiserror = "1.0.58"
+tokio = { version = "1.37.0", features = ["full"] }
+tower-http = { version = "0.5.2", features = ["trace", "full"] }
+tower-sessions = "0.12.2"
+tracing = { version = "0.1.40", features = ["async-await"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+utoipa = { version = "4.2.0", features = ["axum_extras"] }
+utoipa-rapidoc = { version = "4.0.0", features = ["axum"] }
+utoipa-redoc = { version = "4.0.0", features = ["axum"] }
+utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
