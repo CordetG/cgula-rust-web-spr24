@@ -57,7 +57,7 @@ impl Store {
     ///
     /// A `HashMap` containing `QuestionId` as keys and `Question` as values is being returned.
     fn init() -> HashMap<QuestionId, Question> {
-        let file: &str = include_str!("../questions.json");
+        let file = include_str!("../questions.json");
         serde_json::from_str(file).expect("can't read questions.json")
     }
 }
