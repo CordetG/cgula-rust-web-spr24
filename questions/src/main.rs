@@ -25,6 +25,8 @@ use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
 
+use yew::prelude::*;
+
 mod handler;
 pub mod question;
 pub mod store;
@@ -90,9 +92,19 @@ async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+// testing out yew from tutorial
+#[function_component(App)]
+fn app() -> Html {
+    html! {
+        <h1>{ "Hello World" }</h1>
+    }
+}
+
 // main function
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    yew::Renderer::<App>::new().render();
+
     let store = Store::new();
     let store: Arc<Store> = Arc::new(store);
 
