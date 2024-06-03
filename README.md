@@ -51,6 +51,10 @@ To see the server working from chapter 3 for a question: see [ch3-web](#chapter-
 
 ## <!-- End of Get-the-REST-Up --><!-- omit from toc -->
 
+Persistent Data
+[Chapter 9](./ch9-web)
+[Assignment README documented section](#chapter-9)
+
 ## Setup
 
 ```sh
@@ -223,7 +227,7 @@ To better help with my personal understanding of the content, I noted errors I c
 
 ## Acknowledgments
 
-Thanks to Bart Massey for teaching the course material.
+Thanks to Bart Massey for teaching the course material and for the examples provided in the jokes repository.
 
 Thanks to the developers of tokio and axum.
 
