@@ -41,19 +41,20 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 
 ## Assignments
 
-To make access to the specific assignments easier, I made this guide to point to the corresponding package in repo.
+To make access to the specific assignments easier, I made this guide to point to the corresponding write-ups in repo.
 
-Chapter 4: Implement a RESTful API  
-['Get The REST Up' package](./ch4-web)  
+Homework 1: Git Repo Started.
+
+Homework 2: Chapter 4: Implement a RESTful API   
 [Assignment README documented section](#chapter-4)  
 
 To see the server working from chapter 3 for a question: see [ch3-web](#chapter-3)
 
-## <!-- End of Get-the-REST-Up --><!-- omit from toc -->
+Homework 3: Persistent Data
+[Assignment README documented section up to ch. 9](#chapter-9)
 
-Persistent Data
-[Chapter 9](./ch9-web)
-[Assignment README documented section](#chapter-9)
+Homework 4: Front-End
+[Assignment README documented section up to and including ch. 11](#chapter-11)
 
 ## Setup
 
