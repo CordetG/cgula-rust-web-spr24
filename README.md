@@ -76,14 +76,19 @@ Persistent Data
 
 ### Repo
 
-Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples.  
+The below setup was a dumb idea -- but that's my M.O. -- making things harder than they have to be.
 
-I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead.
+I am changing the setup to include the hello -- chapter one -- package, but then deleting and combining all the other code into a single package.
+
+~~Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples.~~  
+
+~~I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead.~~
 
 <details>
 <summary>See: Repo setup</summary>
 
-```text
+```txt
+# No. This was dumb
 main branch
 └── hello/ # Chapter 1
     └── hello v0.1.0
@@ -114,6 +119,20 @@ main branch
 └── LICENSE
 ```
 
+```txt
+# This is the new setup
+main branch
+└── hello/ # Chapter 1
+    └── hello v0.1.0
+├── questions/
+    └── questions v0.1.2
+├── assets/
+├── .gitignore
+├── error-notes.md
+├── README
+└── LICENSE
+```
+
 </details> 
 </br>
 
@@ -128,16 +147,7 @@ To make sure the rust-analyzer server could build my project(s) properly, I set 
     "docwriter.style": "RustDoc",
     "rust-analyzer.linkedProjects": [
         "./hello/Cargo.toml",
-        "./ch2-web/Cargo.toml",
-        "./ch3-web/Cargo.toml",
-        "./ch4-web/Cargo.toml",
-        "./ch5-web/Cargo.toml",
-        "./ch6-web/Cargo.toml",
-        "./ch7-web/Cargo.toml",
-        "./ch8-web/Cargo.toml",
-        "./ch9-web/Cargo.toml",
-        "./ch10-web/Cargo.toml",
-        "./ch11-web/Cargo.toml"
+        "./questions/carg.toml"
     ]
 }
 ```
@@ -216,6 +226,22 @@ But I'm still working on this...
 ### Chapter 8
 
 ### Chapter 9
+
+**NOTES:** When referencing the knock-knock joke class repo, I checked a couple things after the pull to the cloned repo:
+
+```sh
+--> cargo verify-project
+    {"success":"true"}
+
+--> cargo search utoipa-{rapidoc, redoc, swagger-ui}
+
+# After updating the versions, check that the version updates compiled
+--> cargo check
+```
+
+The 3 utoipa crates above were not at the latest version, so I went ahead and updated those. rapidoc and redoc are on version 4.0.0 and swagger-ui is on version 7.1.0. 
+
+Running `cargo check` ran successfully so I can infer that the updates were compatible.
 
 ### Chapter 10
 
