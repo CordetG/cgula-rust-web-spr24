@@ -96,6 +96,10 @@ Trunk is a rather handy extension for VS Code that includes lints (such as rustf
 
 I uninstalled it for now, but I think I need to configure `rust-analyzer` and `trunk` settings to play nicely with each other.
 
+-- update --
+
+Well, now we are using trunk so I have to re-install it *heh*.
+
 ---
 
 ### Terminal
