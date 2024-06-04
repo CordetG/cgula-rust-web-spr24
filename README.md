@@ -31,6 +31,7 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
     + [Chapter 10](#chapter-10)
     + [Chapter 11](#chapter-11)
 + [Error Notes](#error-notes)
++ [MISC. Notes](#misc-notes)
 + [Acknowledgments](#acknowledgments)
 + [References](#references)
 + [License](#license)
@@ -258,6 +259,10 @@ Running `cargo check` ran successfully so I can infer that the updates were comp
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
+
+## MISC. Notes
+
+As mentioned in class, I agree that the book was... not the best. I disliked that when following the examples, they would write it one way, then discuss why *not* to write it that way and delete half of what we had spent a bunch of time writing. I don't agree with that as a method of teaching, especially under time constraints. I personally prefer concise ways of discussion as to *why* one way is preferable. I can understand the discussion of why one way is preffered over another, but I don't agree with *teaching* the non-preffered way first -- it's misleading and confusing.
 
 ## Acknowledgments
 
