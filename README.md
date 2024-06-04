@@ -236,6 +236,9 @@ But I'm still working on this...
 
 --> cargo search utoipa-{rapidoc, redoc, swagger-ui}
 
+# I should've done this instead
+──> cargo update
+
 # After updating the versions, check that the version updates compiled
 --> cargo check
 ```
@@ -258,7 +261,7 @@ To better help with my personal understanding of the content, I noted errors I c
 
 ## Acknowledgments
 
-Thanks to Bart Massey for teaching the course material and for the examples provided in the jokes repository.
+Thanks to Bart Massey for teaching the course material and for the examples provided in the jokes repository that was a helpful resource to implementing the web server, database, etc.
 
 Thanks to the developers of tokio and axum.
 
