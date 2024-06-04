@@ -1,3 +1,4 @@
+<!-- trunk-ignore-all(prettier) -->
 # Rust Web Examples<!-- omit from toc -->
 
 Cordet Gula  
@@ -11,7 +12,9 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 
 ## Table of Contents<!-- omit from toc -->
 
+<!-- trunk-ignore(markdownlint/MD033) -->
 <details>
+<!-- trunk-ignore(markdownlint/MD033) -->
 <summary>Rust Web Examples</summary>
 <!-- blank line-->
 
@@ -86,7 +89,9 @@ I am changing the setup to include the hello -- chapter one -- package, but then
 
 ~~I could have probably set it up differently, such as a single package with multiple binaries and/or modules, but I went about it as a multi-package project instead.~~
 
+<!-- trunk-ignore(markdownlint/MD033) -->
 <details>
+<!-- trunk-ignore(markdownlint/MD033) -->
 <summary>See: Repo setup</summary>
 
 ```txt
@@ -140,7 +145,9 @@ main branch
 
 To make sure the rust-analyzer server could build my project(s) properly, I set the workspace ```settings.json``` to link the specific packages:
 
+<!-- trunk-ignore(markdownlint/MD033) -->
 <details>
+<!-- trunk-ignore(markdownlint/MD033) -->
 <summary>See: Rust-Analyzer Settings</summary>
 
 ```json
@@ -276,14 +283,19 @@ Thanks to the developers of mintlify for making doc comments easier to write.
 
 Gruber, Bastian. Rust Web Development
 
+<!-- trunk-ignore(markdownlint/MD034) -->
 https://github.com/Rust-Web-Development/code
 
+<!-- trunk-ignore(markdownlint/MD034) -->
 https://github.com/tokio-rs/axum
 
+<!-- trunk-ignore(markdownlint/MD034) -->
 https://github.com/pdx-cs-rust-web
 
+<!-- trunk-ignore(markdownlint/MD034) -->
 https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
 
+<!-- trunk-ignore(markdownlint/MD034) -->
 https://docs.rs/axum/latest/axum/
 
 [Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)
