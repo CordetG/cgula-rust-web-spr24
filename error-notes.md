@@ -100,6 +100,8 @@ I uninstalled it for now, but I think I need to configure `rust-analyzer` and `t
 
 Well, now we are using trunk so I have to re-install it *heh*.
 
+Upon reinstalling, I kept getting a trunk error. The solution: an improper setting. I was trying to restrict trunk to only rust settings, but misunderstood what I was changing. When I removed that setting, trunk connected successfully.
+
 ---
 
 ### Terminal
