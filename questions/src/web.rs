@@ -1,4 +1,5 @@
 use crate::*;
+use askama_axum::Template;
 
 /// The IndexTemplate struct in Rust represents a template for rendering an index page with optional
 /// question, tags, stylesheet, and error information.
@@ -22,13 +23,45 @@ pub struct IndexTemplate<'a> {
     error: Option<String>,
 }
 
+/// The `impl<'a> IndexTemplate<'a>` block in Rust is implementing methods for the `IndexTemplate`
+/// struct. Let's break down what each method is doing:
 impl<'a> IndexTemplate<'a> {
+    /// The function `question` takes a reference to a `Question` struct and returns a new instance with
+    /// some additional fields set.
+    ///
+    /// Arguments:
+    ///
+    /// * `question`: The `question` parameter in the `question` function is a reference to a `Question`
+    /// struct.
+    ///
+    /// Returns:
+    ///
+    /// An instance of the struct that the `question` function belongs to.
     fn question(question: &'a Question) -> Self {
         Self {
             question: Some(question),
             tags: question.tags.as_ref().map(format_tags),
-            stylesheet: "/knock-knock.css",
+            stylesheet: "/question.css",
             error: None,
+        }
+    }
+
+    /// The function `error` creates a new instance with an error message.
+    ///
+    /// Arguments:
+    ///
+    /// * `error`: The `error` parameter in the `error` function is a String type that represents an error
+    /// message or description.
+    ///
+    /// Returns:
+    ///
+    /// An instance of the struct that contains the error message provided as a parameter.
+    fn error(error: String) -> Self {
+        Self {
+            question: None,
+            tags: None,
+            stylesheet: "/question.css",
+            error: Some(error),
         }
     }
 }

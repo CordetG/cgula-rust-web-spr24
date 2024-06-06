@@ -30,6 +30,7 @@ use yew::prelude::*;
 mod handler;
 pub mod question;
 pub mod store;
+mod web;
 use crate::handler::*;
 use crate::question::*;
 use store::*;
