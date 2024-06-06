@@ -1,0 +1,28 @@
+<!-- Reference index.html from class example-->
+<html>
+  <head>
+    <title>Questions</title>
+    <link rel="stylesheet" href="{{stylesheet}}">
+  </head>
+  <body>
+  <h1>Question</h1>
+  {%- if let Some(a_question) = question -%}
+  <div class="question">
+      <span class="title">{{a_question.title}}</span><br/>
+      <span class="content">{{a_question.content}}</span><br/>
+  </div>
+  <span class="annotation">
+    [id: {{a_question.id -}}
+    {%- if let Some(tags) = tags -%}; tags={{- tags -}}{%- endif -%}
+    ]
+  {%- endif -%}
+  </span><br/><br/>
+  <form method="get" action="/">
+  <input type="text" name="id"/>
+  <input type="submit" value="Find a question"/>
+  </form>
+  {%- if let Some(error) = error -%}
+  <div class="error">{{error}}</div>
+  {%- endif -%}
+  </body>
+</html>
