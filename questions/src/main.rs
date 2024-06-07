@@ -19,7 +19,7 @@ use headers::ContentType;
 use serde::{Deserialize, Serialize};
 extern crate tracing;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
@@ -27,8 +27,12 @@ use std::sync::Arc;
 
 use yew::prelude::*;
 
+mod api;
+mod appstate;
+mod auth;
 mod handler;
 pub mod question;
+mod startup;
 pub mod store;
 mod web;
 use crate::handler::*;
@@ -53,9 +57,9 @@ async fn get_questions() -> Result<ApiResponse, ApiError> {
 
     let question: Question = Question::new(
         QuestionId::from_str("1").expect("No id provided"),
-        "First Question".to_string(),
-        "Content of question".to_string(),
-        Some(vec!["faq".to_string()]),
+        "First Question",
+        "Content of question",
+        &["faq"],
     );
     match question.id.0.parse::<i32>() {
         Err(_) => Err(ApiError::NotFound),

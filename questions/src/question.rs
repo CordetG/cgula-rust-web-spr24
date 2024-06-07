@@ -19,7 +19,7 @@ use headers::ContentType;
 use serde::{Deserialize, Serialize};
 extern crate tracing;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
@@ -43,7 +43,7 @@ pub struct Question {
     pub id: QuestionId,
     pub title: String,
     pub content: String,
-    pub tags: Option<Vec<String>>,
+    pub tags: Option<HashSet<String>>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -53,8 +53,16 @@ pub struct QuestionId(pub String);
 /// `Question` struct. This method serves as a constructor function for creating new instances of the
 /// `Question` struct.
 impl Question {
-    pub fn new(id: QuestionId, title: String, content: String, tags: Option<Vec<String>>) -> Self {
-        Question {
+    pub fn new(id: QuestionId, title: &str, content: &str, tags: &[&str]) -> Self {
+        let id: QuestionId = id;
+        let title: String = title.into();
+        let content: String = content.into();
+        let tags: Option<HashSet<String>> = if tags.is_empty() {
+            None
+        } else {
+            Some(tags.iter().copied().map(String::from).collect())
+        };
+        Self {
             id,
             title,
             content,
@@ -97,4 +105,10 @@ impl FromStr for QuestionId {
             true => Err(Error::new(ErrorKind::InvalidInput, "No id provided")),
         }
     }
+}
+
+//consider wrapping the function in a closure: `|arg0: &std::vec::Vec<std::string::String>| `, `(/* &std::collections::HashSet<std::string::String> */)`
+pub fn format_tags(tags: &HashSet<String>) -> String {
+    let taglist: Vec<&str> = tags.iter().map(String::as_ref).collect();
+    taglist.join(", ")
 }

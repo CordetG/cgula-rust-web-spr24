@@ -1,7 +1,7 @@
 use crate::*;
 use askama_axum::Template;
 
-/// The IndexTemplate struct in Rust represents a template for rendering an index page with optional
+/// The IndexTemplate struct represents a template for rendering an index page with optional
 /// question, tags, stylesheet, and error information.
 /// Properties:
 /// * `question`: The `question` property is an optional reference to a `Question` struct.
@@ -23,7 +23,7 @@ pub struct IndexTemplate<'a> {
     error: Option<String>,
 }
 
-/// The `impl<'a> IndexTemplate<'a>` block in Rust is implementing methods for the `IndexTemplate`
+/// The `impl<'a> IndexTemplate<'a>` block is implementing methods for the `IndexTemplate`
 /// struct. Let's break down what each method is doing:
 impl<'a> IndexTemplate<'a> {
     /// The function `question` takes a reference to a `Question` struct and returns a new instance with
@@ -65,3 +65,125 @@ impl<'a> IndexTemplate<'a> {
         }
     }
 }
+
+/// The IndexParams struct has an optional field for storing an ID as a string.
+///
+/// Properties:
+///
+/// * `id`: The `id` property in the `IndexParams` struct is an optional field of type `String`. This
+/// means that an `IndexParams` instance may or may not have a value for the `id` field. If a value is
+/// present, it will be a `String`.
+#[derive(Deserialize)]
+pub struct IndexParams {
+    id: Option<String>,
+}
+
+// Reference from joke-repo
+/**
+ * pub async fn handler_index(
+    State(appstate): HandlerAppState,
+    Query(params): Query<IndexParams>,
+) -> Response {
+    let appstate = appstate.read().await;
+    let jokebase = &appstate.jokebase;
+
+    let joke = if let Some(id) = params.id {
+        jokebase.get(&id).await
+    } else {
+        match jokebase.get_random().await {
+            Ok(joke) => return Redirect::to(&format!("/?id={}", joke.id)).into_response(),
+            e => e,
+        }
+    };
+
+    match joke {
+        Ok(joke) => (StatusCode::OK, IndexTemplate::joke(&joke)).into_response(),
+        Err(JokeBaseErr::JokeDoesNotExist(id)) => (
+            StatusCode::OK,
+            IndexTemplate::error(format!("cannot find joke {}", id)),
+        )
+            .into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            IndexTemplate::error(e.to_string()),
+        )
+            .into_response(),
+    }
+}
+ */
+
+/// The `AddParams` struct represents parameters for adding a question with an ID, title, content,
+/// and optional tags.
+///
+/// Properties:
+///
+/// * `id`: The `id` property in the `AddParams` struct is of type `String` and is used to store an
+/// identifier for the item being added.
+/// * `title`: The `title` property in the `AddParams` struct represents the title of the item being
+/// added. It is of type `String`.
+/// * `content`: The `AddParams` struct has the following properties:
+/// * `tags`: The `tags` property in the `AddParams` struct is an optional field of type `String`. This
+/// means that it can either be `Some(String)` if a value is provided, or `None` if no value is
+/// provided.
+#[derive(Deserialize)]
+pub struct AddParams {
+    id: String,
+    title: String,
+    content: String,
+    tags: Option<String>,
+}
+
+/// The function `parse_tags` takes an optional string of tags, splits them by comma, trims whitespace,
+/// and returns a HashSet of non-empty tags if any.
+///
+/// Arguments:
+///
+/// * `tags`: The `parse_tags` function takes an `Option<String>` as input, which represents an optional
+/// string of tags separated by commas.
+///
+/// Returns:
+///
+/// The function `parse_tags` returns an `Option<HashSet<String>>`.
+fn parse_tags(tags: Option<String>) -> Option<HashSet<String>> {
+    let tags = tags?;
+    if tags.is_empty() {
+        return None;
+    }
+    let tags: HashSet<String> = tags.split(',').map(str::trim).map(str::to_string).collect();
+    if tags.is_empty() {
+        None
+    } else {
+        Some(tags)
+    }
+}
+
+// Reference from joke repo
+// * pub async fn handler_add(
+//     State(appstate): HandlerAppState,
+//     Query(params): Query<AddParams>,
+//     session: Session,
+// ) -> Response {
+//     // XXX Condition user input.
+//     let joke = Joke {
+//         id: params.id.clone(),
+//         whos_there: params.who,
+//         answer_who: params.answer,
+//         tags: parse_tags(params.tags),
+//         source: parse_source(params.source),
+//     };
+//
+//     let mut appstate = appstate.write().await;
+//
+//     match appstate.jokebase.add(joke).await {
+//         Ok(()) => Redirect::to(&format!("/?id={}", params.id)).into_response(),
+//         Err(JokeBaseErr::JokeBaseIoError(msg)) => {
+//             (StatusCode::INTERNAL_SERVER_ERROR, msg).into_response()
+//         }
+//         Err(JokeBaseErr::JokeExists(id)) => {
+//             let error = Some(format!("joke {} already exists", id));
+//             let _ = session.insert(SESSION_ERROR_KEY, error).await;
+//             Redirect::to("/tell").into_response()
+//         }
+//         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+//     }
+// }
