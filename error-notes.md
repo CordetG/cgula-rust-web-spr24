@@ -82,6 +82,18 @@ Fix: Changed the return type to include the generic arguments.
     }
 ```
 
+## Formatting
+
+For the `format_tags` function, I kept getting an error when calling it from within `map` with advice to wrap in a closure due to mismatched types:
+
+`consider wrapping the function in a closure:`|arg0: &std::vec::Vec<std::string::String>| `,`(/*&std::collections::HashSet<std::string::String>*/)`
+
+I originally attempted to create the closure, but it just made even more issues. So I worked with changing the types I was working with. Using the joke-repo as a reference, I realized that part of my confusion was with the naming scheme. A `tag` in one module vs. a different module are seperate entities, but may reference each-other --> so, I lost track of the types being used. Eventually, I was able to track through it. 
+
+But, on the positive side, this is a good argument for why comments are important. It's also pretty magical having errors yell at you and then when the issue is fixed how they all disappear --> This is a good feeling.
+
+I will have to say I disagree with the rust formatting to shadow the same names -- this often causes me to get my "wires-crossed" so-to-speak and mixing them up is one of my biggest issues, especially the more code that is added.
+
 ## Miscellaneous Errors
 
 ### Rust-analyzer
