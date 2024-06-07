@@ -30,14 +30,17 @@ use yew::prelude::*;
 mod api;
 mod appstate;
 mod auth;
-mod handler;
 pub mod question;
 mod startup;
 pub mod store;
 mod web;
-use crate::handler::*;
 use crate::question::*;
 use store::*;
+
+/// The line `const STYLESHEET: &str = "css/question.css";` is declaring a constant named `STYLESHEET`
+/// with a value of the string `"css/question.css"`. This constant is of type `&str`, which is a string
+/// slice that points to a sequence of UTF-8 bytes in memory.
+const STYLESHEET: &str = "css/question.css";
 
 /// The function `get_questions` asynchronously retrieves a question and returns a result indicating
 /// success or failure.
@@ -65,36 +68,6 @@ async fn get_questions() -> Result<ApiResponse, ApiError> {
         Err(_) => Err(ApiError::NotFound),
         Ok(_) => Ok(ApiResponse::JsonData(question)),
     }
-}
-
-/// The function `init_router` sets up a web server using Axum in Rust, listens on port 3000, and makes
-/// an async request to https://httpbin.org/ip using reqwest.
-///
-/// Returns:
-///
-/// The `init_router` function returns a `Result<(), Box<dyn std::error::Error>>`. This means that it
-/// can either return `Ok(())` indicating that the function executed successfully without any errors, or
-/// it can return an `Err` containing a boxed error trait object that implements the `std::error::Error`
-/// trait in case of any errors occurring during the execution of the function.
-async fn init_router() -> Result<(), Box<dyn std::error::Error>> {
-    let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
-    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3040);
-
-    let http_server: Router = Router::new().route("/questions", get(get_questions));
-
-    // run with hyper, listening globally on port 3040
-    let listener: tokio::net::TcpListener =
-        tokio::net::TcpListener::bind(socket_addr).await.unwrap();
-    tracing::debug!("serving {}", listener.local_addr().unwrap());
-    axum::serve(listener, http_server).await.unwrap();
-
-    // reqwest with async/await
-    let resp: HashMap<String, String> = reqwest::get("https://httpbin.org/ip")
-        .await?
-        .json::<HashMap<String, String>>()
-        .await?;
-    println!("{:#?}", resp);
-    Ok(())
 }
 
 // testing out yew from tutorial

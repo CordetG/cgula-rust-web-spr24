@@ -79,8 +79,8 @@ pub struct IndexParams {
 }
 
 // Reference from joke-repo
-/**
- * pub async fn handler_index(
+
+/*pub async fn handler_index(
     State(appstate): HandlerAppState,
     Query(params): Query<IndexParams>,
 ) -> Response {
