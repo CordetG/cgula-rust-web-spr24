@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  rustweb:
+    image: rustweb
+    build:
+      context: .
+      dockerfile: ./Dockerfile
