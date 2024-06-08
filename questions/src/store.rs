@@ -8,6 +8,7 @@ use axum::{
 };
 
 use axum_macros::debug_handler;
+use tokio::sync::RwLock;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::follow_redirect::policy::PolicyExt;
@@ -94,7 +95,7 @@ impl IntoResponse for ApiError {
 /// based on their unique identifiers.
 #[derive(Clone)]
 pub struct Store {
-    questions: HashMap<QuestionId, Question>,
+    pub questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
 }
 
 impl Store {
@@ -105,7 +106,7 @@ impl Store {
     /// An instance of the `Store` struct is being returned.
     pub fn new() -> Self {
         Store {
-            questions: Self::init(),
+            questions: Arc::new(RwLock::new(Self::init())),
         }
     }
 
@@ -117,6 +118,34 @@ impl Store {
     fn init() -> HashMap<QuestionId, Question> {
         let file = include_str!("../questions.json");
         serde_json::from_str(file).expect("can't read questions.json")
+    }
+
+    /// The function `get_questions` asynchronously retrieves a question and returns a result indicating
+    /// success or failure.
+    ///
+    /// Returns:
+    ///
+    /// The function `get_questions()` returns a `Result` enum with either an `ApiResponse` or an
+    /// `ApiError`. In this specific case, if the parsing of the question ID to an `i32` is successful, it
+    /// will return `Ok(ApiResponse::JsonData(question))`, where `question` is an instance of the `Question`
+    /// struct. If the parsing fails, it will return an INvalidInput ApiError.
+    #[debug_handler]
+    pub async fn get_questions() -> Result<ApiResponse, ApiError> {
+        /*match params.get("start") {
+            Some(start) => println!("{}", start),
+            None => println!("No start value"),
+        }*/
+
+        let question: Question = Question::new(
+            QuestionId::from_str("1").expect("No id provided"),
+            "First Question",
+            "Content of question",
+            &["faq"],
+        );
+        match question.id.0.parse::<i32>() {
+            Err(_) => Err(ApiError::NotFound),
+            Ok(_) => Ok(ApiResponse::JsonData(question)),
+        }
     }
 }
 
