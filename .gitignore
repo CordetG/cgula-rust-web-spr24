@@ -17,3 +17,6 @@ Cargo.lock
 .vscode/
 .vscode/*
 mint.json
+
+# scripts
+install-docker.zsh
