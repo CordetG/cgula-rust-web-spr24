@@ -173,3 +173,5 @@ docker version:
 ```
 
 So it installed successfully, but wouldn't start. I believe I had an issue starting docker desktop from the terminal previously as well, so I am going to start it from the GUI.
+
+Well -- after all that, docker did not fully uninstall and now I can't even generate a new gpg key and trying to sign in results in an error with a ticket to support. So -- I give up on docker.
