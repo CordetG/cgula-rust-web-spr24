@@ -21,6 +21,7 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 + [Assignments](#assignments)
 + [Setup](#setup)
     + [Repo](#repo)
+    + [Docker](#docker)
 + [Chapters](#chapters)
     + [Chapter 1](#chapter-1)
     + [Chapter 2](#chapter-2)
@@ -162,6 +163,41 @@ To make sure the rust-analyzer server could build my project(s) properly, I set 
 ```
 
 </details> 
+
+### Docker
+
+Initially, I tried setting up docker via the Docker Desktop GUI, but just kept getting errors. So, I set it up using the terminal:
+
+```zsh
+──> docker init
+
+Welcome to the Docker Init CLI!
+
+This utility will walk you through creating the following files with sensible defaults for your project:
+  - .dockerignore
+  - Dockerfile
+  - compose.yaml
+  - README.Docker.md
+
+Let's get started!
+
+? What application platform does your project use? Rust
+? What version of Rust do you want to use? 21
+? What port does your server listen on? 3040
+
+✔ Created → .dockerignore
+✔ Created → Dockerfile
+✔ Created → compose.yaml
+✔ Created → README.Docker.md
+
+→ Your Docker files are ready!
+  Review your Docker files and tailor them to your application.
+  Consult README.Docker.md for information about using the generated files.
+
+What's next?
+  Start your application by running → docker compose up --build
+  Your application will be available at http://localhost:3040
+```
 
 <!-- Chapter Reports -->
 ## Chapters
