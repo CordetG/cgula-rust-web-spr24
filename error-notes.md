@@ -94,6 +94,14 @@ But, on the positive side, this is a good argument for why comments are importan
 
 I will have to say I disagree with the rust formatting to shadow the same names -- this often causes me to get my "wires-crossed" so-to-speak and mixing them up is one of my biggest issues, especially the more code that is added.
 
+## Panic
+
+```zsh
+thread 'main' panicked at .cargo/registry/src/index.crates.io-6f17d22bba15001f/js-sys-0.3.69/src/lib.rs:6013:9:
+cannot call wasm-bindgen imported functions on non-wasm targets
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
 ## Miscellaneous Errors
 
 ### Rust-analyzer
@@ -114,6 +122,12 @@ Well, now we are using trunk so I have to re-install it *heh*.
 
 Upon reinstalling, I kept getting a trunk error. The solution: an improper setting. I was trying to restrict trunk to only rust settings, but misunderstood what I was changing. When I removed that setting, trunk connected successfully.
 
+```zsh
+Ensure that HEALTHCHECK instructions have been added to container images (Trunk)
+```
+
+Trunk is getting on my nerves. Half the errors are from trunk alone -- talk about micro-managing.
+
 ---
 
 ### Terminal
@@ -125,3 +139,37 @@ export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
 To confirm: [This Stack Overflow issue](https://stackoverflow.com/questions/67656028/rustup-gives-command-not-found-error-with-zsh-even-after-installing-with-brew) confirmed. Once I updated the path, everything worked fine.
+
+### Docker
+
+I kept getting a pop-up window for entering a passphrase for the gpg key. Problem is, I don't recall ever entering a passphrase and I'm usually pretty good at keeping track of those kinds of things. Apparently I am not the only one: [See the forum.](https://forums.docker.com/t/enter-the-passphrase-to-unlock-the-openpgp-secret-key/134700/7)
+
+So, per the last comment in the forum I went to the page for [gpg-keys for linux users](https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users). I deleted my current keys and started from scratch with the aformentioned page.
+
+Apparently, there were still problems so I completely unistalled docker using a couple references to do so:
+[completely uninstall docker](https://www.benjaminrancourt.ca/how-to-completely-uninstall-docker/) -- then went ahead and followed the installation process.. again.
+
+Because I was annoyed, I made a script with all the commands because I didn't want to do everything by hand again. 
+
+I recieved the following error + output:
+
+```zsh
+Failed to start docker-desktop.service: Process org.freedesktop.systemd1 exited with status 1
+See user logs and 'systemctl --user status docker-desktop.service' for details.
+
+docker versions:
+docker compose:
+    Docker Compose version v2.27.0-desktop.2
+docker --version:
+    Docker version 26.1.4, build 5650f9b
+docker version:
+    Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+    Client: Docker Engine - Community
+    Cloud integration: v1.0.35+desktop.13
+    Version:           26.1.4
+    API version:       1.45
+    Go version:        go1.21.11
+    ...
+```
+
+So it installed successfully, but wouldn't start. I believe I had an issue starting docker desktop from the terminal previously as well, so I am going to start it from the GUI.
