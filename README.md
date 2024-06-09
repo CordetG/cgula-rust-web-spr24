@@ -268,6 +268,15 @@ But I'm still working on this...
 
 ### Chapter 7
 
+Create a database
+
+```sh
+# install sqlx
+cargo install sqlx-cli
+    ...
+    Installed package `sqlx-cli v0.7.4` (executables `cargo-sqlx`, `sqlx`)
+```
+
 ### Chapter 8
 
 ### Chapter 9
