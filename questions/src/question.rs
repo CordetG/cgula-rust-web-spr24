@@ -107,8 +107,90 @@ impl FromStr for QuestionId {
     }
 }
 
-//consider wrapping the function in a closure: `|arg0: &std::vec::Vec<std::string::String>| `, `(/* &std::collections::HashSet<std::string::String> */)`
+/// The function `format_tags` takes a HashSet of strings and returns a formatted string with the tags
+/// separated by commas.
+/// 
+/// Arguments:
+/// 
+/// * `tags`: The `format_tags` function takes a reference to a `HashSet` of `String` values as input.
+/// It then converts the `HashSet` into a vector of string references and joins them together with a
+/// comma and space to create a single formatted string.
+/// 
+/// Returns:
+/// 
+/// A formatted string containing the tags from the HashSet, separated by commas.
 pub fn format_tags(tags: &HashSet<String>) -> String {
     let taglist: Vec<&str> = tags.iter().map(String::as_ref).collect();
     taglist.join(", ")
+}
+
+/*#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct Question {
+    #[schema(example = "boo")]
+    pub id: String,
+    #[schema(example = "Boo")]
+    pub whos_there: String,
+    #[schema(example = "You don't have to cry about it!")]
+    pub answer_who: String,
+    #[schema(example = r#"["kids", "food"]"#)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<HashSet<String>>,
+    #[schema(example = "http://example.com/knock-knock-questions")]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+}
+
+impl Question {
+    pub fn new(
+        id: &str,
+        whos_there: &str,
+        answer_who: &str,
+        tags: &[&str],
+        source: Option<&str>,
+    ) -> Self {
+        let id = id.into();
+        let whos_there = whos_there.into();
+        let answer_who = answer_who.into();
+        let tags: Option<HashSet<String>> = if tags.is_empty() {
+            None
+        } else {
+            Some(tags.iter().copied().map(String::from).collect())
+        };
+        let source = source.map(String::from);
+        Self {
+            id,
+            whos_there,
+            answer_who,
+            tags,
+            source,
+        }
+    }
+}
+
+pub fn format_tags(tags: &HashSet<String>) -> String {
+    let taglist: Vec<&str> = tags.iter().map(String::as_ref).collect();
+    taglist.join(", ")
+}*/
+
+impl From<&Question> for String {
+    fn from(question: &Question) -> Self {
+        let mut text: String = "Question\n".into();
+        text += &format!("{}.\n", question.title);
+        text += &format!("\"{}\" who?\n", question.content);
+        text += "\n";
+
+        let mut annote: Vec<String> = vec![format!("id: {}", question.id)];
+        if let Some(tags) = &question.tags {
+            annote.push(format!("tags: {}", format_tags(tags)));
+        }
+        let annote: String = annote.join("; ");
+        text += &format!("[{}]\n", annote);
+        text
+    }
+}
+
+impl IntoResponse for &Question {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(&self)).into_response()
+    }
 }
