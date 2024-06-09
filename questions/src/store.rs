@@ -93,6 +93,7 @@ impl IntoResponse for ApiError {
     }
 }
 
+/*
 // Section 4.2 -- Creating a 'store' for the questions
 /// The `Store` struct contains a collection of questions stored in a HashMap with `QuestionId` keys and
 /// `Question` values.
@@ -139,7 +140,10 @@ impl Store {
     /// will return `Ok(ApiResponse::JsonData(question))`, where `question` is an instance of the `Question`
     /// struct. If the parsing fails, it will return an INvalidInput ApiError.
     #[debug_handler]
-    pub async fn get_questions() -> Result<ApiResponse, ApiError> {
+    pub async fn get_questions(
+        params: HashMap<String, String>,
+        store: Store,
+    ) -> Result<ApiResponse, ApiError> {
         /*match params.get("start") {
             Some(start) => println!("{}", start),
             None => println!("No start value"),
@@ -151,6 +155,14 @@ impl Store {
             "Content of question",
             &["faq"],
         );
+
+        if !params.is_empty() {
+            let pagination = extract_pagination(params)?;
+            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+            let res = &res[pagination.start..pagination.end];
+        } else {
+            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+        };
         match question.id.0.parse::<i32>() {
             Err(_) => Err(ApiError::NotFound),
             Ok(_) => Ok(ApiResponse::JsonData(question)),
@@ -162,9 +174,18 @@ impl Default for Store {
     fn default() -> Self {
         Self::new()
     }
+}*/
+
+#[derive(Debug, Serialize)]
+struct Pagination {
+    start: usize,
+    end: usize,
 }
 
-/*
+fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, String> {
+    Ok(Pagination { start: 0, end: 10 })
+}
+
 // Reference from jokebase class repo
 #[derive(Debug, thiserror::Error, ToSchema, Serialize)]
 // XXX Fixme!
@@ -172,6 +193,8 @@ impl Default for Store {
 pub enum StoreErr {
     #[error("Store io failed: {0}")]
     StoreIoError(String),
+    #[error("Question already exists: {0}")]
+    QuestionExists(String),
     #[error("no question")]
     NoQuestion,
     #[error("question {0} doesn't exist")]
@@ -199,7 +222,7 @@ pub struct StoreError {
 }
 
 pub fn error_schema(name: &str, example: serde_json::Value) -> (&str, RefOr<Schema>) {
-    let sch = ObjectBuilder::new()
+    let sch: RefOr<Schema> = ObjectBuilder::new()
         .property(
             "status",
             ObjectBuilder::new().schema_type(SchemaType::String),
@@ -240,11 +263,15 @@ impl StoreError {
 }
 
 #[derive(Debug, Clone)]
-pub struct Store(pub Pool<Postgres>);
+pub struct Store {
+    pub questions: RwLock<HashMap<String, Question>>,
+}
+
+//pub struct Store(pub Pool<Postgres>);
 
 impl Store {
     async fn to_question(&self, row: &PgRow) -> Result<Question, sqlx::Error> {
-        let id: QuestionId = row.get("id");
+        let id: String = row.get("id");
         let tags: Vec<_> = sqlx::query(r#"SELECT tag FROM tags WHERE id = $1"#)
             .bind(&id)
             .fetch_all(&self.0)
@@ -253,8 +280,8 @@ impl Store {
         let tags: Option<HashSet<String>> = if tags.is_empty() { None } else { Some(tags) };
         Ok(Question {
             id,
-            title,
-            content,
+            title: row.get("title"),
+            content: row.get("content"),
             tags,
         })
     }
@@ -280,7 +307,7 @@ impl Store {
         use std::env::var;
 
         let password = read_secret("PG_PASSWORDFILE").await?;
-        let url = format!(
+        let url: String = format!(
             "postgres://{}:{}@{}:5432/{}",
             var("PG_USER")?,
             password.trim(),
@@ -293,16 +320,16 @@ impl Store {
     }
 
     pub async fn get<'a>(&self, index: &str) -> Result<Question, StoreErr> {
-        let row = sqlx::query(r#"SELECT * FROM questions WHERE id = $1;"#)
+        let row: PgRow = sqlx::query(r#"SELECT * FROM questions WHERE id = $1;"#)
             .bind(index)
             .fetch_one(&self.0)
             .await?;
 
-        let question = self.to_question(&row).await?;
+        let question: Question = self.to_question(&row).await?;
         Ok(question)
     }
 
-    pub async fn get_questions() -> Result<ApiResponse, ApiError> {
+    /*pub async fn get_questions() -> Result<ApiResponse, ApiError> {
         /*match params.get("start") {
             Some(start) => println!("{}", start),
             None => println!("No start value"),
@@ -318,45 +345,52 @@ impl Store {
             Err(_) => Err(ApiError::NotFound),
             Ok(_) => Ok(ApiResponse::JsonData(question)),
         }
-    }
-
-    /*pub async fn get_questions<'a>(&self) -> Result<Vec<Question>, StoreErr> {
-        let rows: Vec<PgRow> = sqlx::query(r#"SELECT * FROM questions;"#)
-            .fetch_all(&self.0)
-            .await?;
-        let mut questions: Vec<Question> = Vec::with_capacity(rows.len());
-        for j in rows.iter() {
-            questions.push(self.to_question(j).await?);
-        }
-        Ok(questions)
     }*/
 
-    pub async fn add(&mut self, question: Question, id: QuestionId) -> Result<(), StoreErr> {
+    pub async fn get_questions(
+        params: HashMap<String, String>,
+        store: Extension<Store>,
+    ) -> Json<Vec<Question>> {
+        let store: Store = store.0;
+
+        if !params.is_empty() {
+            let pagination: Pagination =
+                extract_pagination(params).unwrap_or_else(|_| Pagination { start: 0, end: 10 });
+            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+            let res = res[pagination.start..pagination.end].to_vec();
+            Json(res)
+        } else {
+            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+            Json(res)
+        }
+    }
+
+    pub async fn add(&mut self, question: Question) -> Result<(), StoreErr> {
         let mut tx: sqlx::Transaction<'_, _> = Pool::begin(&self.0).await?;
-        let result: Result<!, sqlx::Error> = sqlx::query(
+        let result: Result<sqlx::postgres::PgQueryResult, sqlx::Error> = sqlx::query(
             r#"INSERT INTO questions
-            (id, whos_there, answer_who, source)
-            VALUES ($1, $2, $3, $4);"#,
+            (id, title, content)
+            VALUES ($1, $2, $3);"#,
         )
-        .bind(&id)
+        .bind(&question.id)
         .bind(&question.title)
         .bind(&question.content)
         .execute(&mut *tx)
         .await;
-        result.map_err(|err| {
+        result.map_err(|err| -> StoreErr {
             if let sqlx::Error::Database(ref dbe) = err {
                 if let Some("23505") = dbe.code().as_deref() {
                     return StoreErr::QuestionExists(question.id.to_string());
                 }
             }
-            StoreErr::DatabaseError(e.to_string())
+            StoreErr::DatabaseError(err.to_string())
         })?;
         Self::insert_tags(&mut tx, &question.id, &question.tags).await?;
         Ok(tx.commit().await?)
     }
 
     pub async fn delete(&mut self, index: &str) -> Result<(), StoreErr> {
-        let mut tx = Pool::begin(&self.0).await?;
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.questions).await?;
         sqlx::query(r#"DELETE FROM tags WHERE id = $1;"#)
             .bind(index)
             .execute(&mut *tx)
@@ -372,14 +406,14 @@ impl Store {
     }
 
     pub async fn update(&mut self, index: &str, question: Question) -> Result<(), StoreErr> {
-        let mut tx = Pool::begin(&self.0).await?;
-        let q = sqlx::query(
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.questions).await?;
+        let q: sqlx::query::Query<Postgres, sqlx::postgres::PgArguments> = sqlx::query(
             r#"UPDATE questions
             SET (whos_there, answer_who, source) = ($2, $3, $4)
             WHERE questions.id = $1
             RETURNING questions.id;"#,
         );
-        let result = q
+        let result: Vec<PgRow> = q
             .bind(&question.id)
             .bind(&question.title)
             .bind(&question.content)
@@ -395,4 +429,4 @@ impl Store {
         Self::insert_tags(&mut tx, &question.id, &question.tags).await?;
         Ok(tx.commit().await?)
     }
-}*/
+}

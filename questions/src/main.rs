@@ -21,6 +21,7 @@ use sqlx::{
 };
 
 use axum_macros::debug_handler;
+use tower_http::add_extension::AddExtensionLayer;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::follow_redirect::policy::PolicyExt;
@@ -39,6 +40,7 @@ use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
+use utoipa::openapi::Server;
 
 use yew::prelude::*;
 
@@ -68,5 +70,16 @@ fn app() -> Html {
 // main function
 #[tokio::main]
 async fn main() {
-    startup::startup();
+    //startup::startup();
+    let app = Router::new()
+        .route("/questions", get(store::Store::get_questions))
+        .layer(axum::AddExtensionLayer::new(Store {
+            questions: RwLock::new(HashMap::new()),
+        }));
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }

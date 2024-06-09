@@ -3,9 +3,8 @@ use appstate::AppState;
 use serde_urlencoded::ser;
 use serde_wasm_bindgen::Error;
 use sqlx::error;
-use std::sync::Arc;
-
 use std::fmt;
+use std::sync::Arc;
 
 /*// ChatGPT help
 enum CustomSerError {
@@ -73,6 +72,30 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
         std::process::exit(1);
     });*/
 
+    let store = Store::new();
+    let store: Arc<_> = Arc::new(store);
+
+    // Create a new Axum router
+    let app = Router::new()
+        // Define GET /questions route
+        .route(
+            "/questions",
+            get(Store::get_questions.clone().into_service()),
+        )
+        // Define POST /questions route
+        .route("/questions", post(add_question.clone().into_service()))
+        // Define PUT /questions/:id route
+        .route(
+            "/questions/:id",
+            put(update_question.clone().into_service()),
+        )
+        // Add error recovery middleware
+        .recover(return_error);
+
+    let service = ServiceBuilder::new()
+        .layer(AddExtension::new(store))
+        .service(app);
+
     let store: Store = Store::new();
     let store_clone: Store = store.clone();
     let store_arc: Arc<Store> = Arc::new(store);
@@ -80,7 +103,7 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
     let store_filter = axum::extract::Extension(store_arc);
 
     let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
-    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3080);
+    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3060);
 
     let cors = cors::CorsLayer::new()
         .allow_methods([Method::GET])
@@ -90,7 +113,7 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
         .route("/questions", get(Store::get_questions))
         .layer(
             CorsLayer::new()
-                .allow_origin("http://localhost:3080".parse::<HeaderValue>().unwrap())
+                .allow_origin("http://localhost:3060".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET]),
         );
 
