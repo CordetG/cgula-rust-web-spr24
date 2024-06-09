@@ -34,7 +34,11 @@ serde_urlencoded = "0.7.1"
 serde-wasm-bindgen = "0.6.5"
 thiserror = "1.0.58"
 tokio = { version = "1.37.0", features = ["full"] }
-tower-http = { version = "0.5.2", features = ["trace", "full"] }
+tower-http = { version = "0.5.2", features = [
+    "trace",
+    "full",
+    "add_extension",
+] }
 tower-sessions = "0.12.2"
 tracing = { version = "0.1.40", features = ["async-await"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
