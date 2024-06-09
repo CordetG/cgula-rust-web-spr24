@@ -82,6 +82,26 @@ Fix: Changed the return type to include the generic arguments.
     }
 ```
 
+## Object Safe
+
+I kept getting errors similar to this:
+
+```sh
+the trait `question::_::_serde::ser::Error` cannot be made into an object
+the trait cannot be made into an object because it requires `Self: Sized`
+for a trait to be "object safe" it needs to allow building a vtable to allow the call to be resolvable dynamically; for more information visit <https://doc.rust-lang.org/reference/items/traits.html#object-safety>
+the following types implement the trait, consider defining an enum where each variant holds one of these types, implementing `question::_::_serde::ser::Error` for this new enum and using it instead:
+  question::_::_serde::__private::doc::Error
+  question::_::_serde::de::value::Error
+  serde_json::Error
+  serde_urlencoded::ser::Error
+  serde_wasm_bindgen::error::Error
+  std::boxed::Box<bincode::error::ErrorKind>
+  std::fmt::Error
+```
+
+I had included a code snippet -- asking chatpgt for help -- which I found completely useless, but no surprise there. I realized that reading this error discussing building a `vtable` for object-safety actually helped with understanding how the knock-knock repo was utilizing tables. I can't say -- even though they are rather frustrating -- that gettings errors aren't helpful with learning. I often seem to learn more in the process of failing than doing something successfully by accident.
+
 ## Formatting
 
 For the `format_tags` function, I kept getting an error when calling it from within `map` with advice to wrap in a closure due to mismatched types:
