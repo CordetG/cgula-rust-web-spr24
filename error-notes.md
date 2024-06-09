@@ -102,6 +102,8 @@ the following types implement the trait, consider defining an enum where each va
 
 I had included a code snippet -- asking chatpgt for help -- which I found completely useless, but no surprise there. I realized that reading this error discussing building a `vtable` for object-safety actually helped with understanding how the knock-knock repo was utilizing tables. I can't say -- even though they are rather frustrating -- that gettings errors aren't helpful with learning. I often seem to learn more in the process of failing than doing something successfully by accident.
 
+Solution: Interestingly, apparently the multitudes of this form of error was a result of missing a crate feature. Once I added `tower_http -- features = add_extension` to the `Cargo.toml` All the errors disappeared. It's safe to say that understanding the libraries you are working with a huge factor in the coding process.
+
 ## Formatting
 
 For the `format_tags` function, I kept getting an error when calling it from within `map` with advice to wrap in a closure due to mismatched types:
