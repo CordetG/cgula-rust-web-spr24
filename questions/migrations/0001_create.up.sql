@@ -1,9 +1,9 @@
--- https://www.shuttle.rs/blog/2023/10/04/sql-in-rust
-
 CREATE TABLE IF NOT EXISTS questions (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
+  id serial PRIMARY KEY,
+  title VARCHAR (255) NOT NULL,
   content TEXT NOT NULL,
+  tags TEXT [],
+  created_on TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS tags (
