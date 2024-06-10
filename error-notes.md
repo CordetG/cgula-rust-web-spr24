@@ -102,7 +102,44 @@ the following types implement the trait, consider defining an enum where each va
 
 I had included a code snippet -- asking chatpgt for help -- which I found completely useless, but no surprise there. I realized that reading this error discussing building a `vtable` for object-safety actually helped with understanding how the knock-knock repo was utilizing tables. I can't say -- even though they are rather frustrating -- that gettings errors aren't helpful with learning. I often seem to learn more in the process of failing than doing something successfully by accident.
 
-Solution: Interestingly, apparently the multitudes of this form of error was a result of missing a crate feature. Once I added `tower_http -- features = add_extension` to the `Cargo.toml` All the errors disappeared. It's safe to say that understanding the libraries you are working with a huge factor in the coding process.
+~~Solution:~~ Interestingly, apparently the multitudes of this form of error was a result of missing a crate feature. Once I added `tower_http -- features = add_extension` to the `Cargo.toml` All the errors disappeared. It's safe to say that understanding the libraries you are working with a huge factor in the coding process.
+
+Well, nevermind. running `cargo check` -- clippy mentioned it is not a feature. ugh. But adding it to the file did not fix an error saying it needed to be added. Lovely. I guess I'm just gunna `cargo clean` and keep working through it.
+
+```sh
+error: failed to select a version for `tower-http`.
+    ... required by package `questions v0.1.2 (/git_local/rust_web/questions)`
+versions that meet the requirements `^0.5.2` (locked to 0.5.2) are: 0.5.2
+
+the package `questions` depends on `tower-http`, with features: `add_extension` but `tower-http` does not have these features.
+
+
+failed to select a version for `tower-http` which could resolve this conflict
+```
+
+<!-- trunk-ignore(markdownlint/MD034) -->
+So, I did the logical thing and looked at the docs again https://docs.rs/tower-http/latest/tower_http/. I then added some of the recommended crates in the examples. Thank goodness for `cargo add <crate>` -- it makes things a lot easy to add to `Cargo.toml`.
+
+## Trait Bounds
+
+I am so tired of the `trait-bounds` errors, her is one of many:
+
+```sh
+the trait bound `std::collections::HashSet<std::string::String>: sqlx::Decode<'_, sqlx::Postgres>` is not satisfied
+the following other types implement trait `sqlx::Decode<'r, DB>`:
+  <bool as sqlx::Decode<'r, sqlx::Any>>
+  <bool as sqlx::Decode<'_, sqlx::Postgres>>
+  <i8 as sqlx::Decode<'_, sqlx::Postgres>>
+  <i16 as sqlx::Decode<'r, sqlx::Any>>
+  <i16 as sqlx::Decode<'_, sqlx::Postgres>>
+  <i32 as sqlx::Decode<'r, sqlx::Any>>
+  <i32 as sqlx::Decode<'_, sqlx::Postgres>>
+  <i64 as sqlx::Decode<'r, sqlx::Any>>
+and 41 others
+required for `std::option::Option<std::collections::HashSet<std::string::String>>` to implement `sqlx::Decode<'_, sqlx::Postgres>`
+```
+
+It just seems like a rabbit-hole of `"implement everything for everything"`. So I am ignoring them for now and hope that as I continue to got through my code, it ceases to be an issue. Otherwise, I will look more into it.
 
 ## Formatting
 
