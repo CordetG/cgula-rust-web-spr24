@@ -254,12 +254,6 @@ Passes `cargo clippy`
     Finished dev [unoptimized + debuginfo] target(s) in 0.11s
 ```
 
-TODO:
-
-Having issues understanding how to convert warp::filter to axum. From what I understand, axum uses a service instead of a filter.
-
-But I'm still working on this...
-
 <!-- Current -->
 
 ### Chapter 5
@@ -314,7 +308,11 @@ To better help with my personal understanding of the content, I noted errors I c
 
 ## MISC. Notes
 
-As mentioned in class, I agree that the book was... not the best. I disliked that when following the examples, they would write it one way, then discuss why *not* to write it that way and delete half of what we had spent a bunch of time writing. I don't agree with that as a method of teaching, especially under time constraints. I personally prefer concise ways of discussion as to *why* one way is preferable. I can understand the discussion of why one way is preffered over another, but I don't agree with *teaching* the non-preffered way first -- it's misleading and confusing.
+As mentioned in class, I agree that the book was... not the best. I disliked that when following the examples, they would write it one way, then discuss why *not* to write it that way and delete half of what we had spent a bunch of time writing. I don't agree with that as a method of teaching, especially under time constraints. I personally prefer concise ways of discussion as to *why* one way is preferable. I can understand the discussion of why one way is preffered over another, but I don't agree with *teaching* the non-preffered way first -- it's misleading and confusing. They changed the same functions so many times that I ended up sifting through mountains of errors.
+
+While I liked the `live book` on the manning website due to it being interactive, the formatting of the code examples were all over the place -- so it definately needs some improvement as well. See screenshot below:
+
+![Screenshot of messy code](./assets/book-format-issue.png)
 
 ## Acknowledgments
 
