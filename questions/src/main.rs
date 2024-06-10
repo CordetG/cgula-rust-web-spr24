@@ -69,9 +69,9 @@ fn app() -> Html {
 
 // main function
 #[tokio::main]
-async fn main() -> Result<(), sqlx::Error> {
-    let log_filter = std::env::var("RUST_LOG")
+async fn main() {
+    let log_filter: String = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=warn,warp=warn".to_owned());
     let store: Store = store::Store::new("postgres:/ /localhost:5432/rustwebdev").await;
-    startup::startup()
+    startup::startup();
 }
