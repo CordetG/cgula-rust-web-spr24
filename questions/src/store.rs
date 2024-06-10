@@ -6,21 +6,20 @@ use axum::{
     routing::{any, get, post},
     Json, Router,
 };
-
 use axum_macros::debug_handler;
+use headers::ContentType;
+use serde::{Deserialize, Serialize, Serializer};
+use tokio::sync::mpsc::error;
 use tokio::sync::RwLock;
 use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
 use tower_http::follow_redirect::policy::PolicyExt;
 use tower_http::services::{ServeDir, ServeFile};
-
-use headers::ContentType;
-use serde::{Deserialize, Serialize, Serializer};
 extern crate tracing;
-
-use crate::PgRow;
 use axum::handler::Handler;
+use core::num::ParseIntError;
 use serde::ser::{Error, SerializeStruct};
+use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::{PgConnection, Pool, Postgres, Row};
 use std::collections::{HashMap, HashSet};
 use std::convert::Infallible;
@@ -34,6 +33,12 @@ use utoipa::{
 };
 
 use crate::question::*;
+use crate::types::{
+    answer::Answer,
+    question::{Question, QuestionId},
+};
+
+use sqlx::error::Error as SqlxError;
 
 // Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
 pub enum ApiResponse {
@@ -176,42 +181,28 @@ impl Default for Store {
     }
 }*/
 
-#[derive(Debug, Serialize)]
-struct Pagination {
-    start: usize,
-    end: usize,
-}
-
-fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, String> {
-    Ok(Pagination { start: 0, end: 10 })
-}
-
 // Reference from jokebase class repo
 #[derive(Debug, thiserror::Error, ToSchema, Serialize)]
-// XXX Fixme!
-#[allow(dead_code)]
 pub enum StoreErr {
-    #[error("Store io failed: {0}")]
-    StoreIoError(String),
-    #[error("Question already exists: {0}")]
-    QuestionExists(String),
-    #[error("no question")]
-    NoQuestion,
-    #[error("question {0} doesn't exist")]
-    QuestionDoesNotExist(String),
-    #[error("database error: {0}")]
-    DatabaseError(String),
+    #[error("Cannot parse parameter")]
+    ParseError(String),
+    #[error{"Missing Parameter"}]
+    MissingParameters(String),
+    #[error("Query could not be executed")]
+    DatabaseQueryError(String),
+    #[error("Question doesn't exist")]
+    QuestionNotFound(String),
 }
 
-impl From<std::io::Error> for StoreErr {
-    fn from(err: std::io::Error) -> Self {
-        StoreErr::StoreIoError(err.to_string())
+impl From<std::num::ParseIntError> for StoreErr {
+    fn from(e: std::num::ParseIntError) -> Self {
+        StoreErr::ParseError(e.to_string())
     }
 }
 
-impl From<sqlx::Error> for StoreErr {
-    fn from(err: sqlx::Error) -> Self {
-        StoreErr::DatabaseError(err.to_string())
+impl From<SqlxError> for StoreErr {
+    fn from(e: SqlxError) -> Self {
+        StoreErr::DatabaseQueryError(e.to_string())
     }
 }
 
@@ -257,17 +248,67 @@ impl Serialize for StoreError {
 
 impl StoreError {
     pub fn response(status: StatusCode, error: StoreErr) -> Response {
-        let error = StoreError { status, error };
+        let error: StoreError = StoreError { status, error };
         (status, Json(error)).into_response()
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Store {
-    pub questions: RwLock<HashMap<String, Question>>,
+/// Pagination struct which is getting extract
+/// from query params
+#[derive(Default, Debug)]
+pub struct Pagination {
+    /// The index of the last item which has to be returned
+    pub limit: Option<u32>,
+    /// The index of the first item which has to be returned
+    pub offset: u32,
 }
 
-//pub struct Store(pub Pool<Postgres>);
+/// Extract query parameters from the `/questions` route
+/// # Example query
+/// GET requests to this route can have a pagination attached so we just
+/// return the questions we need
+/// `/questions?start=1&end=10`
+/// # Example usage
+/// ```rust
+/// use std::collections::HashMap;
+///
+/// let mut query = HashMap::new();
+/// query.insert("limit".to_string(), "1".to_string());
+/// query.insert("offset".to_string(), "10".to_string());
+/// let p = pagination::extract_pagination(query).unwrap();
+/// assert_eq!(p.limit, Some(1));
+/// assert_eq!(p.offset, 10);
+/// ```
+pub fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, StoreErr> {
+    // Could be improved in the future
+    if params.contains_key("limit") && params.contains_key("offset") {
+        return Ok(Pagination {
+            // Takes the "limit" parameter in the query
+            // and tries to convert it to a number
+            limit: Some(params.get("limit").unwrap().parse::<u32>().map_err(
+                |error: std::num::ParseIntError| -> ParseIntError {
+                    std::num::ParseIntError::into(error)
+                },
+            )?),
+            // Takes the "offset" parameter in the query
+            // and tries to convert it to a number
+            offset: params.get("offset").unwrap().parse::<u32>().map_err(
+                |error: std::num::ParseIntError| -> ParseIntError {
+                    std::num::ParseIntError::into(error)
+                },
+            )?,
+        });
+    }
+
+    Err(StoreErr::MissingParameters(
+        "Missing Parameters".to_string(),
+    ))
+}
+
+#[derive(Debug, Clone)]
+pub struct Store {
+    pub connection: PgPool,
+}
 
 impl Store {
     async fn to_question(&self, row: &PgRow) -> Result<Question, sqlx::Error> {
@@ -303,20 +344,19 @@ impl Store {
         Ok(())
     }
 
-    pub async fn new() -> Result<Self, Box<dyn Error>> {
-        use std::env::var;
+    pub async fn new(db_url: &str) -> Self {
+        let db_pool: Pool<Postgres> = match PgPoolOptions::new()
+            .max_connections(5)
+            .connect(db_url)
+            .await
+        {
+            Ok(pool) => pool,
+            Err(e) => panic!("Couldn't establish DB connection:[]", e),
+        };
 
-        let password = read_secret("PG_PASSWORDFILE").await?;
-        let url: String = format!(
-            "postgres://{}:{}@{}:5432/{}",
-            var("PG_USER")?,
-            password.trim(),
-            var("PG_HOST")?,
-            var("PG_DBNAME")?,
-        );
-        let pool: Pool<Postgres> = PgPool::connect(&url).await?;
-        sqlx::migrate!().run(&pool).await?;
-        Ok(Store(pool))
+        Store {
+            connection: db_pool,
+        }
     }
 
     pub async fn get<'a>(&self, index: &str) -> Result<Question, StoreErr> {
@@ -348,20 +388,24 @@ impl Store {
     }*/
 
     pub async fn get_questions(
-        params: HashMap<String, String>,
-        store: Extension<Store>,
-    ) -> Json<Vec<Question>> {
-        let store: Store = store.0;
-
-        if !params.is_empty() {
-            let pagination: Pagination =
-                extract_pagination(params).unwrap_or_else(|_| Pagination { start: 0, end: 10 });
-            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-            let res = res[pagination.start..pagination.end].to_vec();
-            Json(res)
-        } else {
-            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-            Json(res)
+        &self,
+        limit: Option<i32>,
+        offset: i32,
+    ) -> Result<Vec<Question>, sqlx::Error> {
+        match sqlx::query("SELECT * from questions LIMIT $1 OFFSET $2")
+            .bind(limit)
+            .bind(offset)
+            .map(|row: PgRow| Question {
+                id: QuestionId(row.get("id")),
+                title: row.get("title"),
+                content: row.get("content"),
+                tags: row.get("tags"),
+            })
+            .fetch_all(&self.connection)
+            .await
+        {
+            Ok(questions) => Ok(questions),
+            Err(err) => Err(err),
         }
     }
 
