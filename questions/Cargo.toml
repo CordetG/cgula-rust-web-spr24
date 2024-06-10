@@ -34,11 +34,7 @@ serde_urlencoded = "0.7.1"
 serde-wasm-bindgen = "0.6.5"
 thiserror = "1.0.58"
 tokio = { version = "1.37.0", features = ["full"] }
-tower-http = { version = "0.5.2", features = [
-    "trace",
-    "full",
-    "add_extension",
-] }
+tower-http = { version = "0.5.2", features = ["trace", "full"] }
 tower-sessions = "0.12.2"
 tracing = { version = "0.1.40", features = ["async-await"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
@@ -46,3 +42,8 @@ utoipa = { version = "4.2.0", features = ["axum_extras"] }
 utoipa-rapidoc = { version = "4.0.0", features = ["axum"] }
 utoipa-redoc = { version = "4.0.0", features = ["axum"] }
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+bytes = "1.6.0"
+http = "1.1.0"
+http-body-util = "0.1.1"
+hyper-util = "0.1.5"
+tower = "0.4.13"

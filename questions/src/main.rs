@@ -69,17 +69,9 @@ fn app() -> Html {
 
 // main function
 #[tokio::main]
-async fn main() {
-    //startup::startup();
-    let app = Router::new()
-        .route("/questions", get(store::Store::get_questions))
-        .layer(axum::AddExtensionLayer::new(Store {
-            questions: RwLock::new(HashMap::new()),
-        }));
-
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+async fn main() -> Result<(), sqlx::Error> {
+    let log_filter = std::env::var("RUST_LOG")
+        .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=warn,warp=warn".to_owned());
+    let store: Store = store::Store::new("postgres:/ /localhost:5432/rustwebdev").await;
+    startup::startup()
 }

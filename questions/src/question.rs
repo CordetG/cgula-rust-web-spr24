@@ -153,22 +153,22 @@ impl IntoResponse for &Question {
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Question {
-    #[schema(example = "boo")]
+    #[schema(example = "1")]
     pub id: String,
-    #[schema(example = "Boo")]
+    #[schema(example = "How?")]
     pub title: String,
-    #[schema(example = "You don't have to cry about it!")]
+    #[schema(example = "Please help!")]
     pub content: String,
-    #[schema(example = r#"["kids", "food"]"#)]
+    #[schema(example = r#"["general"]"#)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<HashSet<String>>,
 }
 
 impl Question {
     pub fn new(id: &str, title: &str, content: &str, tags: &[&str], source: Option<&str>) -> Self {
-        let id = id.into();
-        let title = title.into();
-        let content = content.into();
+        let id: String = id.into();
+        let title: String = title.into();
+        let content: String = content.into();
         let tags: Option<HashSet<String>> = if tags.is_empty() {
             None
         } else {
