@@ -37,8 +37,8 @@ use crate::types::{
     answer::Answer,
     question::{Question, QuestionId},
 };
-
 use sqlx::error::Error as SqlxError;
+use tracing::{event, instrument, Level};
 
 // Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
 pub enum ApiResponse {
@@ -97,89 +97,6 @@ impl IntoResponse for ApiError {
         }
     }
 }
-
-/*
-// Section 4.2 -- Creating a 'store' for the questions
-/// The `Store` struct contains a collection of questions stored in a HashMap with `QuestionId` keys and
-/// `Question` values.
-///
-/// Properties:
-///
-/// * `questions`: The `questions` property in the `Store` struct is a HashMap that stores `Question`
-/// objects with a key of type `QuestionId`. This allows you to efficiently store and retrieve questions
-/// based on their unique identifiers.
-#[derive(Clone)]
-pub struct Store {
-    pub questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
-}
-
-impl Store {
-    /// The function `new` initializes a `Store` struct with questions initialized using the `init` method.
-    ///
-    /// Returns:
-    ///
-    /// An instance of the `Store` struct is being returned.
-    pub fn new() -> Self {
-        Store {
-            questions: Arc::new(RwLock::new(Self::init())),
-        }
-    }
-
-    /// The `init` function reads questions from a JSON file and returns them as a HashMap.
-    ///
-    /// Returns:
-    ///
-    /// A `HashMap` containing `QuestionId` as keys and `Question` as values is being returned.
-    fn init() -> HashMap<QuestionId, Question> {
-        let file = include_str!("../questions.json");
-        serde_json::from_str(file).expect("can't read questions.json")
-    }
-
-    /// The function `get_questions` asynchronously retrieves a question and returns a result indicating
-    /// success or failure.
-    ///
-    /// Returns:
-    ///
-    /// The function `get_questions()` returns a `Result` enum with either an `ApiResponse` or an
-    /// `ApiError`. In this specific case, if the parsing of the question ID to an `i32` is successful, it
-    /// will return `Ok(ApiResponse::JsonData(question))`, where `question` is an instance of the `Question`
-    /// struct. If the parsing fails, it will return an INvalidInput ApiError.
-    #[debug_handler]
-    pub async fn get_questions(
-        params: HashMap<String, String>,
-        store: Store,
-    ) -> Result<ApiResponse, ApiError> {
-        /*match params.get("start") {
-            Some(start) => println!("{}", start),
-            None => println!("No start value"),
-        }*/
-
-        let question: Question = Question::new(
-            QuestionId::from_str("1").expect("No id provided"),
-            "First Question",
-            "Content of question",
-            &["faq"],
-        );
-
-        if !params.is_empty() {
-            let pagination = extract_pagination(params)?;
-            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-            let res = &res[pagination.start..pagination.end];
-        } else {
-            let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-        };
-        match question.id.0.parse::<i32>() {
-            Err(_) => Err(ApiError::NotFound),
-            Ok(_) => Ok(ApiResponse::JsonData(question)),
-        }
-    }
-}
-
-impl Default for Store {
-    fn default() -> Self {
-        Self::new()
-    }
-}*/
 
 // Reference from jokebase class repo
 #[derive(Debug, thiserror::Error, ToSchema, Serialize)]
@@ -263,22 +180,6 @@ pub struct Pagination {
     pub offset: u32,
 }
 
-/// Extract query parameters from the `/questions` route
-/// # Example query
-/// GET requests to this route can have a pagination attached so we just
-/// return the questions we need
-/// `/questions?start=1&end=10`
-/// # Example usage
-/// ```rust
-/// use std::collections::HashMap;
-///
-/// let mut query = HashMap::new();
-/// query.insert("limit".to_string(), "1".to_string());
-/// query.insert("offset".to_string(), "10".to_string());
-/// let p = pagination::extract_pagination(query).unwrap();
-/// assert_eq!(p.limit, Some(1));
-/// assert_eq!(p.offset, 10);
-/// ```
 pub fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, StoreErr> {
     // Could be improved in the future
     if params.contains_key("limit") && params.contains_key("offset") {
@@ -369,68 +270,25 @@ impl Store {
         Ok(question)
     }
 
-    /*pub async fn get_questions() -> Result<ApiResponse, ApiError> {
-        /*match params.get("start") {
-            Some(start) => println!("{}", start),
-            None => println!("No start value"),
-        }*/
+    // Define an async handler function for Axum
 
-        let question: Question = Question::new(
-            QuestionId::from_str("1").expect("No id provided"),
-            "First Question",
-            "Content of question",
-            &["faq"],
-        );
-        match question.id.0.parse::<i32>() {
-            Err(_) => Err(ApiError::NotFound),
-            Ok(_) => Ok(ApiResponse::JsonData(question)),
-        }
-    }*/
-
-    pub async fn get_questions(
-        &self,
-        limit: Option<i32>,
-        offset: i32,
-    ) -> Result<Vec<Question>, sqlx::Error> {
-        match sqlx::query("SELECT * from questions LIMIT $1 OFFSET $2")
-            .bind(limit)
-            .bind(offset)
+    pub async fn add_question(&self, new_question: NewQuestion) -> Result<Question, sqlx::Error> {
+        match sqlx::query("INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)")
+            .bind(new_question.title)
+            .bind(new_question.content)
+            .bind(new_question.tags)
             .map(|row: PgRow| Question {
                 id: QuestionId(row.get("id")),
                 title: row.get("title"),
                 content: row.get("content"),
                 tags: row.get("tags"),
             })
-            .fetch_all(&self.connection)
+            .fetch_one(&self.connection)
             .await
         {
-            Ok(questions) => Ok(questions),
-            Err(err) => Err(err),
+            Ok(question) => Ok(question),
+            Err(e) => Err(e),
         }
-    }
-
-    pub async fn add(&mut self, question: Question) -> Result<(), StoreErr> {
-        let mut tx: sqlx::Transaction<'_, _> = Pool::begin(&self.0).await?;
-        let result: Result<sqlx::postgres::PgQueryResult, sqlx::Error> = sqlx::query(
-            r#"INSERT INTO questions
-            (id, title, content)
-            VALUES ($1, $2, $3);"#,
-        )
-        .bind(&question.id)
-        .bind(&question.title)
-        .bind(&question.content)
-        .execute(&mut *tx)
-        .await;
-        result.map_err(|err| -> StoreErr {
-            if let sqlx::Error::Database(ref dbe) = err {
-                if let Some("23505") = dbe.code().as_deref() {
-                    return StoreErr::QuestionExists(question.id.to_string());
-                }
-            }
-            StoreErr::DatabaseError(err.to_string())
-        })?;
-        Self::insert_tags(&mut tx, &question.id, &question.tags).await?;
-        Ok(tx.commit().await?)
     }
 
     pub async fn delete(&mut self, index: &str) -> Result<(), StoreErr> {
@@ -444,7 +302,7 @@ impl Store {
             .fetch_all(&mut *tx)
             .await?;
         if result.len() == 0 {
-            return Err(StoreErr::QuestionDoesNotExist(index.to_string()));
+            return Err(StoreErr::QuestionNotFound(index.to_string()));
         }
         Ok(tx.commit().await?)
     }
@@ -464,7 +322,7 @@ impl Store {
             .fetch_all(&mut *tx)
             .await?;
         if result.len() == 0 {
-            return Err(StoreErr::QuestionDoesNotExist(index.to_string()));
+            return Err(StoreErr::QuestionNotFound(index.to_string()));
         }
         sqlx::query(r#"DELETE FROM tags WHERE id = $1;"#)
             .bind(index)

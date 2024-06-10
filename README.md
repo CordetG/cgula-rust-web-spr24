@@ -349,6 +349,9 @@ https://docs.rs/axum/latest/axum/
 
 [Docker Install: Debian](https://docs.docker.com/desktop/install/debian/)
 
+<!-- trunk-ignore(markdownlint/MD034) -->
+https://lib.rs/crates/cargo-renamepkg
+
 ## License
 
 This project is licensed with the [MIT license](./LICENSE).

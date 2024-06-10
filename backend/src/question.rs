@@ -1,6 +1,7 @@
 // Implementation for ch4 continued from ch3/ to set up RESTful API
 
 #![allow(unused_imports, dead_code, unused_must_use, unused_variables)]
+use crate::store::*;
 use axum::extract::{self, path, Extension, Path, State};
 use axum::{
     http::{HeaderValue, Method, StatusCode},
@@ -8,6 +9,8 @@ use axum::{
     routing::{any, get, post},
     Json, Router,
 };
+use core::convert::Infallible;
+use tracing::{event, instrument, Level};
 
 use axum_macros::debug_handler;
 use tower_http::compression::CompressionLayer;
@@ -164,6 +167,13 @@ pub struct Question {
     pub tags: Option<HashSet<String>>,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct NewQuestion {
+    pub title: String,
+    pub content: String,
+    pub tags: Option<Vec<String>>,
+}
+
 impl Question {
     pub fn new(id: &str, title: &str, content: &str, tags: &[&str], source: Option<&str>) -> Self {
         let id: String = id.into();
@@ -203,5 +213,36 @@ impl From<&Question> for String {
 impl IntoResponse for &Question {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(&self)).into_response()
+    }
+}
+
+#[instrument]
+pub async fn get_questions(
+    params: HashMap<String, String>,
+    store: Store,
+) -> Result<Json<Vec<Question>>, Infallible> {
+    event!(target: "questions", Level::INFO, "querying questions");
+    let mut pagination: Pagination = Pagination::default();
+
+    if !params.is_empty() {
+        event!(Level::INFO, pagination = true);
+        pagination = extract_pagination(params)?;
+        let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+        let res: &[Question] = &res[pagination.start..pagination.end];
+        Ok(axum::response::Json(res))
+    } else {
+        event!(Level::INFO, pagination = false);
+        let res: Vec<Question> = match store
+            .get_questions(pagination.limit, pagination.offset)
+            .await
+        {
+            Ok(res) => res,
+            Err(e) => {
+                return Ok(axum::response::Json(warp::reply::json(
+                    &Error::DatabaseQueryError(e),
+                )));
+            }
+        };
+        Ok(axum::response::Json(res))
     }
 }

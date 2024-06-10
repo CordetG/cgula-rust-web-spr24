@@ -1,5 +1,5 @@
 [package]
-name = "questions"
+name = "backend"
 version = "0.1.2"
 edition = "2021"
 # Do not publish to crates.io

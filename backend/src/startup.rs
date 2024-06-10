@@ -1,6 +1,8 @@
 use crate::*;
 use appstate::AppState;
+use axum::extract::FromRequest;
 use bytes::Bytes;
+use core::convert::Infallible;
 use http::{header::USER_AGENT, HeaderValue, Request};
 use http_body_util::Full;
 use hyper_util::{client::legacy::Client, rt::TokioExecutor};
@@ -51,6 +53,14 @@ impl serde::ser::Error for CustomSerError {
         CustomSerError::FmtError(fmt::Error::new(ErrorKind::Other, format!("{}", msg)))
     }
 }*/
+
+// Define an async handler function for Axum
+async fn handler(
+    params: Json<HashMap<String, String>>,
+    store: Store,
+) -> Result<Json<Vec<Question>>, Infallible> {
+    Store::get_questions(params.into_inner(), store).await
+}
 
 pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
     //yew::Renderer::<App>::new().render();
@@ -126,7 +136,7 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
                 .allow_methods([Method::GET]),
         );
 
-    // run with hyper, listening globally on port 3040
+    // run with hyper, listening globally on port 3060
     let listener: tokio::net::TcpListener =
         tokio::net::TcpListener::bind(socket_addr).await.unwrap();
     tracing::debug!("serving {}", listener.local_addr().unwrap());
