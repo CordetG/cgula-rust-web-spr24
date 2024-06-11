@@ -234,3 +234,14 @@ docker version:
 So it installed successfully, but wouldn't start. I believe I had an issue starting docker desktop from the terminal previously as well, so I am going to start it from the GUI.
 
 Well -- after all that, docker did not fully uninstall and now I can't even generate a new gpg key and trying to sign in results in an error with a ticket to support. So -- I give up on docker.
+
+### Technical Difficulties
+
+There are pros and cons of using an IDE. Pros is that there are feature that can assist with development. Cons is that it can break things.
+I utilize mintlify doc writer to help with writing decent doc-comments, but everytime vscode has an update the extension breaks.
+
+The following error was from the rust-analyzer where I added both the frontend and backend as dependencies to each other. Turns out the I just needed to add one as a dependency to the other. I wasn't sure which I should utilize, but it seems that adding just one as a dependency allows the other to use the other crate as well.
+
+```sh
+error: cyclic package dependency: package `backend v0.1.2 (.../git_local/rust_web/backend)` depends on itself.
+```
