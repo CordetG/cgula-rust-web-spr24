@@ -11,4 +11,4 @@ wasm-bindgen-futures = "0.4"
 wasm-cookies = "0.2.1"
 web-sys = { version = "0.3.69", features = ["HtmlTextAreaElement"] }
 yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
-backend = { path = "../backend/", version = "0.1.2" }
+#backend = { path = "../backend/", version = "0.1.2" }
