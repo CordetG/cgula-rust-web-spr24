@@ -34,6 +34,7 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
     + [Chapter 9](#chapter-9)
     + [Chapter 10](#chapter-10)
     + [Chapter 11](#chapter-11)
++ [Front End](#front-end)
 + [Error Notes](#error-notes)
 + [MISC. Notes](#misc-notes)
 + [Acknowledgments](#acknowledgments)
@@ -84,7 +85,9 @@ Homework 4: Front-End
 
 The below setup was a dumb idea -- but that's my M.O. -- making things harder than they have to be.
 
-I am changing the setup to include the hello -- chapter one -- package, but then deleting and combining all the other code into a single package.
+I am changing the setup to include the hello -- chapter one -- package, but then deleting and combining all the other code into a single backend package.
+
+The frontend is setup as a seperate crate from the backend.
 
 ~~Each chapter is set up as a separate rust binary package. The reason why I implemented the repo this way was because it helps me conceptualize how the chapters from the book build on each other. It also allows me to reference prior chapters' examples.~~  
 
@@ -132,8 +135,10 @@ main branch
 main branch
 └── hello/ # Chapter 1
     └── hello v0.1.0
-├── questions/
-    └── questions v0.1.2
+├── frontend/
+    └── frontend v0.1.2
+├── backend/
+    └── backend v0.1.0
 ├── assets/
 ├── .gitignore
 ├── error-notes.md
@@ -157,7 +162,8 @@ To make sure the rust-analyzer server could build my project(s) properly, I set 
     "docwriter.style": "RustDoc",
     "rust-analyzer.linkedProjects": [
         "./hello/Cargo.toml",
-        "./questions/carg.toml"
+        "./backend/Cargotoml",
+        "./frontend/Cargo.toml"
     ]
 }
 ```
@@ -198,6 +204,8 @@ What's next?
   Start your application by running → docker compose up --build
   Your application will be available at http://localhost:3040
 ```
+
+Gave up on docker -- read the [error notes here](./error-notes.md).
 
 <!-- Chapter Reports -->
 ## Chapters
@@ -302,11 +310,51 @@ Running `cargo check` ran successfully so I can infer that the updates were comp
 
 ### Chapter 11
 
+## Front End
+
+Cloned the knock-knock-yew repo, then renamed the package.
+
+```sh
+──> cargo clone https://github.com/pdx-cs-rust-web/knock-knock-yew
+
+    Cloning into 'knock-knock-yew'...
+    remote: Enumerating objects: 67, done.
+    remote: Counting objects: 100% (67/67), done.
+    remote: Compressing objects: 100% (30/30), done.
+    remote: Total 67 (delta 29), reused 67 (delta 29), pack-reused 0
+    Receiving objects: 100% (67/67), 9.27 KiB | 9.27 MiB/s, done.
+    Resolving deltas: 100% (29/29), done.
+
+──> cargo renamepkg knock-knock-yew frontend
+
+    you are going to rename this package from [knock-knock-yew] to [frontend] (y/N)
+    y
+    completed
+
+──> cargo check 
+    error[E0463]: can't find crate for `core`
+    |
+    = note: the `wasm32-unknown-unknown` target may not be installed
+    = help: consider downloading the target with `rustup target add wasm32-unknown-unknown`
+
+──> rustup target add wasm32-unknown-unknown
+
+    info: downloading component 'rust-std' for 'wasm32-unknown-unknown'
+    info: installing component 'rust-std' for 'wasm32-unknown-unknown'
+
+──> cargo check
+    Checking frontend v0.1.0 (../git_local/rust_web/frontend)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.48s
+```
+
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
 
 ## MISC. Notes
+
+I decided to try to add the port `3060` as used in my application to vscode to see if it would be of any benefit for running a service.
+![Screenshot of port-forwarding](./assets/port-forwarding.png)
 
 As mentioned in class, I agree that the book was... not the best. I disliked that when following the examples, they would write it one way, then discuss why *not* to write it that way and delete half of what we had spent a bunch of time writing. I don't agree with that as a method of teaching, especially under time constraints. I personally prefer concise ways of discussion as to *why* one way is preferable. I can understand the discussion of why one way is preffered over another, but I don't agree with *teaching* the non-preffered way first -- it's misleading and confusing. They changed the same functions so many times that I ended up sifting through mountains of errors.
 
@@ -351,6 +399,8 @@ https://docs.rs/axum/latest/axum/
 
 <!-- trunk-ignore(markdownlint/MD034) -->
 https://lib.rs/crates/cargo-renamepkg
+
+GitHub Co-Pilot
 
 ## License
 
