@@ -359,7 +359,43 @@ Cloned the knock-knock-yew repo, then renamed the package.
 ──> cargo check
     Checking frontend v0.1.0 (../git_local/rust_web/frontend)
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.48s
+
+──> cargo install trunk
+    Finished `release` profile [optimized] target(s) in 2m 34s
+  Installing /.cargo/bin/trunk
+   Installed package `trunk v0.20.2` (executable `trunk`)
 ```
+
+I realized that the `.trunk` directory needed to be in the frontend crate. Prior to that, there was no serve command. So, moving the trunk directory allowed me to run the code with `trunk serve`.
+
+```sh
+──> trunk serve
+
+2024-06-12T20:47:19.421601Z  INFO 🚀 Starting trunk 0.20.2
+2024-06-12T20:47:19.510505Z  INFO 📦 starting build
+   Compiling cfg-if v1.0.0
+    ...
+   Compiling yew v0.21.0 (https://github.com/yewstack/yew/#dbdd3b78)
+   Compiling frontend v0.1.0 (/git_local/rust_web/frontend)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.58s
+2024-06-12T20:47:31.946281Z  INFO downloading wasm-bindgen version="0.2.92"
+2024-06-12T20:47:32.667319Z  INFO installing wasm-bindgen
+2024-06-12T20:47:33.447249Z  INFO applying new distribution
+2024-06-12T20:47:33.449925Z  INFO ✅ success
+2024-06-12T20:47:33.450129Z  INFO 📡 serving static assets at -> /
+2024-06-12T20:47:33.450507Z  INFO 📡 server listening at:
+2024-06-12T20:47:33.450522Z  INFO     🏠 http://127.0.0.1:8080/
+2024-06-12T20:47:33.450531Z  INFO     🏠 http://[::1]:8080/
+2024-06-12T20:47:33.451075Z  INFO 📦 starting build
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+2024-06-12T20:47:34.574146Z  INFO applying new distribution
+2024-06-12T20:47:34.579199Z  INFO ✅ success
+
+```
+
+*sigh* Well, this is progress, I guess. 
+
+![Screenshot of question server running](./assets/question-running.png)
 
 ## Error Notes
 
