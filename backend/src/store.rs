@@ -19,6 +19,7 @@ extern crate tracing;
 use axum::handler::Handler;
 use core::num::ParseIntError;
 use serde::ser::{Error, SerializeStruct};
+use serde_json::json;
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::{PgConnection, Pool, Postgres, Row};
 use std::collections::{HashMap, HashSet};
@@ -376,7 +377,7 @@ impl Store {
         let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.questions).await?;
         let q: sqlx::query::Query<Postgres, sqlx::postgres::PgArguments> = sqlx::query(
             r#"UPDATE questions
-            SET (whos_there, answer_who, source) = ($2, $3, $4)
+            SET (title, content) = ($2, $3)
             WHERE questions.id = $1
             RETURNING questions.id;"#,
         );

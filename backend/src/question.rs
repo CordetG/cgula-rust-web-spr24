@@ -33,6 +33,9 @@ use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
 
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct QuestionId(pub i32);
+
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Question {
     #[schema(example = "1")]
@@ -54,17 +57,14 @@ pub struct NewQuestion {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct QuestionId(pub i32);
+pub struct AnswerId(pub i32);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Answer {
-    pub id: AnswerId,
-    pub content: String,
-    pub question_id: QuestionId,
+    id: AnswerId,
+    content: String,
+    question_id: QuestionId,
 }
-
-#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct AnswerId(pub i32);
 
 /// The function `format_tags` takes a HashSet of strings and returns a formatted string with the tags
 /// separated by commas.
@@ -100,13 +100,6 @@ impl Question {
             tags,
         }
     }
-
-    let delete_question = warp::delete()
-    .and(warp::path("questions"))
-    .and(warp::path::param::<i32>())
-    .and(warp::path::end())
-    .and(store_filter.clone())
-    .and_then(routes::question::delete_question);
 }
 
 impl From<&Question> for String {

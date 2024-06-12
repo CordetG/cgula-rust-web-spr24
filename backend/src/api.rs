@@ -37,8 +37,11 @@ pub struct ApiDoc;
 )]
 pub async fn questions(State(appstate): HandlerAppState) -> Response {
     let questions: Result<Vec<Question>, sqlx::Error> =
-        appstate.read().await.store.get_questions().await;
-    (StatusCode::OK, Json(questions)).into_response()
+        appstate.read().await.store.get_questions(None, 1).await;
+    match questions {
+        Ok(questions) => Json(questions).into_response(),
+        Err(e) => StoreError::response(StatusCode::INTERNAL_SERVER_ERROR, e.into()),
+    }
 }
 
 #[utoipa::path(

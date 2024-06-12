@@ -1,6 +1,7 @@
 // Implementation for ch4 continued from ch3/ to set up RESTful API
 
 #![allow(unused_imports, dead_code, unused_must_use, unused_variables)]
+use crate::api::*;
 use axum::extract::{self, path, Extension, Path, State};
 use axum::{
     async_trait,
@@ -34,11 +35,13 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use headers::ContentType;
 use serde::{Deserialize, Serialize};
 
+use core::net::SocketAddr;
 use std::collections::{HashMap, HashSet};
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
+use tower::ServiceBuilder;
 use utoipa::openapi::Server;
 
 use yew::prelude::*;
@@ -52,6 +55,16 @@ pub mod store;
 mod web;
 use crate::question::*;
 use crate::store::*;
+
+use log::{debug, error, info, warn};
+
+/*info!("User {} logged in", user.id);
+warn!("User {} logged in {} times", user.id, login_count);
+err!("Failed to load User {} from DB", user.id);
+debug!(
+    "User {} access controls: {}, {}",
+    user.id, user.admin, user.supervisor
+);*/
 
 /// The line `const STYLESHEET: &str = "css/question.css";` is declaring a constant named `STYLESHEET`
 /// with a value of the string `"css/question.css"`. This constant is of type `&str`, which is a string

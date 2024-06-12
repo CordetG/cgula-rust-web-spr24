@@ -12,6 +12,7 @@ use sqlx::error;
 use std::fmt;
 use std::sync::Arc;
 use tower::{Service, ServiceBuilder, ServiceExt};
+use tower_http::add_extension::{AddExtension, AddExtensionLayer};
 use tower_http::{
     classify::StatusInRangeAsFailures, decompression::DecompressionLayer,
     set_header::SetRequestHeaderLayer, trace::TraceLayer,
@@ -92,7 +93,7 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
         .allow_origin(cors::Any);
 
     let http_server: Router = Router::new()
-        .route("/questions", get(Store::get_questions))
+        .route("/backend", get(Store::get_questions))
         .layer(
             CorsLayer::new()
                 .allow_origin("http://localhost:3060".parse::<HeaderValue>().unwrap())
