@@ -279,6 +279,20 @@ cargo install sqlx-cli
     Installed package `sqlx-cli v0.7.4` (executables `cargo-sqlx`, `sqlx`)
 ```
 
+Example from book:
+
+```sql
+$ psql postgres
+postgres=# create database rustwebdev;
+CREATE DATABASE
+postgres=# \l
+    Name    |  Owner  | Encoding | Collate | Ctype |  Access privileges
+------------+---------+----------+---------+-------+---------------------
+ postgres   | bgruber | UTF8     | C       | C     |
+ rustwebdev | bgruber | UTF8     | C       | C     |
+(2 rows)
+```
+
 ### Chapter 8
 
 ### Chapter 9
