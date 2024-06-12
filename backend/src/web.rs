@@ -15,7 +15,7 @@ use askama_axum::Template;
 /// message or description of an error that may have occurred. It allows for displaying error messages
 /// to the user when rendering the template.
 #[derive(Template)]
-#[template(path = "index.html")]
+#[template(path = "../../frontend/index.html")]
 pub struct IndexTemplate<'a> {
     question: Option<&'a Question>,
     tags: Option<String>,
@@ -41,7 +41,7 @@ impl<'a> IndexTemplate<'a> {
         Self {
             question: Some(question),
             tags: question.tags.as_ref().map(format_tags),
-            stylesheet: "/question.css",
+            stylesheet: "../../frontend/index.css",
             error: None,
         }
     }

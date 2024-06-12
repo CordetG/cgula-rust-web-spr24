@@ -13,7 +13,6 @@ use axum::{
     routing::{delete, put},
     Json, RequestPartsExt, Router,
 };
-
 use sqlx::{
     self,
     postgres::{PgConnection, PgPool, PgRow, Postgres},
@@ -52,12 +51,12 @@ mod startup;
 pub mod store;
 mod web;
 use crate::question::*;
-use store::*;
+use crate::store::*;
 
 /// The line `const STYLESHEET: &str = "css/question.css";` is declaring a constant named `STYLESHEET`
 /// with a value of the string `"css/question.css"`. This constant is of type `&str`, which is a string
 /// slice that points to a sequence of UTF-8 bytes in memory.
-const STYLESHEET: &str = "css/question.css";
+const STYLESHEET: &str = "../../frontend/index.css";
 
 // testing out yew from tutorial
 #[function_component(App)]
@@ -72,6 +71,33 @@ fn app() -> Html {
 async fn main() {
     let log_filter: String = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=warn,warp=warn".to_owned());
-    let store: Store = store::Store::new("postgres:/ /localhost:5432/rustwebdev").await;
+    let store: Store = store::Store::new("postgres://localhost:3060/guest").await;
+    use mysql_async::{prelude::Queryable, Pool};
+
+    // Assuming `store` is your shared state
+    let store_layer: AddExtensionLayer<_> = AddExtensionLayer::new(store);
+
+    let app = Router::new()
+        .route(
+            "/questions/:id",
+            put(question::update_question).delete(question::delete_question),
+        )
+        .layer(ServiceBuilder::new().layer(store_layer))
+        .boxed();
+
+    // Then you can run your app with hyper
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3060));
+    hyper::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+
+    let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
+
+    let mut conn: mysql_async::Conn = pool.get_conn().await.unwrap();
+    let result: () = conn
+        .query_drop("CREATE TABLE users (id INT, name TEXT)")
+        .await
+        .unwrap();
     startup::startup();
 }

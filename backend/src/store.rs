@@ -33,10 +33,10 @@ use utoipa::{
 };
 
 use crate::question::*;
-use crate::types::{
+/*use crate::sqlx::types::{
     answer::Answer,
     question::{Question, QuestionId},
-};
+};*/
 use sqlx::error::Error as SqlxError;
 use tracing::{event, instrument, Level};
 
@@ -180,6 +180,24 @@ pub struct Pagination {
     pub offset: u32,
 }
 
+/// Extract query parameters from the `/questions` route
+///
+/// # Example query
+///
+/// GET requests to this route can have a pagination attached so we just
+/// return the questions we need
+/// `/questions?start=1&end=10`
+///
+/// # Example usage
+///
+/// ```rust
+/// let mut query = HashMap::new();
+/// query.insert("start".to_string(), "1".to_string());
+/// query.insert("end".to_string(), "10".to_string());
+/// let p = types::pagination::extract_pagination(query).unwrap();
+/// assert_eq!(p.start, 1);
+/// assert_eq!(p.end, 10);
+/// ```
 pub fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination, StoreErr> {
     // Could be improved in the future
     if params.contains_key("limit") && params.contains_key("offset") {
@@ -268,6 +286,53 @@ impl Store {
 
         let question: Question = self.to_question(&row).await?;
         Ok(question)
+    }
+
+    pub async fn get_questions(
+        &self,
+        limit: Option<u32>,
+        offset: u32,
+    ) -> Result<Vec<Question>, sqlx::Error> {
+        match sqlx::query("SELECT * from questions LIMIT $1 OFFSET $2")
+            .bind(limit)
+            .bind(offset)
+            .map(|row: PgRow| Question {
+                id: QuestionId(row.get("id")),
+                title: row.get("title"),
+                content: row.get("content"),
+                tags: row.get("tags"),
+            })
+            .fetch_all(&self.connection)
+            .await
+        {
+            Ok(questions) => Ok(questions),
+            Err(e) => {
+                tracing::event!(tracing::Level::ERROR, "{:?}", e);
+                Err(Error::DatabaseQueryError)
+            }
+        }
+    }
+
+    async fn add_answer(
+        Extension(store): Extension<Store>,
+        Json(params): Json<HashMap<String, String>>,
+    ) -> impl IntoResponse {
+        let answer = Answer {
+            id: AnswerId("1".to_string()),
+            content: params.get("content").unwrap().to_string(),
+            question_id: QuestionId(params.get("questionId").unwrap().to_string()),
+        };
+
+        store
+            .answers
+            .write()
+            .await
+            .insert(answer.id.clone(), answer);
+
+        (
+            StatusCode::OK,
+            AxumJson(json!({ "message": "Answer added" })),
+        )
     }
 
     // Define an async handler function for Axum

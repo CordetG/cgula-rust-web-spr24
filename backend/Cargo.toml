@@ -47,3 +47,5 @@ http = "1.1.0"
 http-body-util = "0.1.1"
 hyper-util = "0.1.5"
 tower = "0.4.13"
+frontend = { path = "../frontend/", version = "0.1.0" }
+mysql_async = "0.34.1"

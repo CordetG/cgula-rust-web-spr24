@@ -17,43 +17,6 @@ use tower_http::{
     set_header::SetRequestHeaderLayer, trace::TraceLayer,
 };
 
-/*// ChatGPT help
-enum CustomSerError {
-    SerdeDocError(serde::__private::doc::Error),
-    SerdeDeValueError(serde::de::value::Error),
-    SerdeJsonError(serde_json::Error),
-    SerdeUrlencodedError(serde_urlencoded::ser::Error),
-    SerdeWasmBindgenError(serde_wasm_bindgen::Error),
-    BincodeError(Box<error::ErrorKind>),
-    FmtError(std::fmt::Error),
-}
-
-impl fmt::Display for CustomSerError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Implement formatting logic here
-        match self {
-            CustomSerError::SerdeDocError(err) => write!(f, "Serde Doc Error: {}", err),
-            CustomSerError::SerdeDeValueError(err) => write!(f, "Serde De Value Error: {}", err),
-            CustomSerError::SerdeJsonError(err) => write!(f, "Serde JSON Error: {}", err),
-            CustomSerError::SerdeUrlencodedError(err) => {
-                write!(f, "Serde URL Encoded Error: {}", err)
-            }
-            CustomSerError::SerdeWasmBindgenError(err) => {
-                write!(f, "Serde Wasm Bindgen Error: {}", err)
-            }
-            CustomSerError::BincodeError(err) => write!(f, "Bincode Error: {:?}", err),
-            CustomSerError::FmtError(err) => write!(f, "Format Error: {}", err),
-        }
-    }
-}
-
-// Implement serde::ser::Error for CustomSerError
-impl serde::ser::Error for CustomSerError {
-    fn custom<T: fmt::Display>(msg: T) -> Self {
-        CustomSerError::FmtError(fmt::Error::new(ErrorKind::Other, format!("{}", msg)))
-    }
-}*/
-
 // Define an async handler function for Axum
 async fn handler(
     params: Json<HashMap<String, String>>,

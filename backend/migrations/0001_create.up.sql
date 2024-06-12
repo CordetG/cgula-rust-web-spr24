@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS questions (
   created_on TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS tags (
-  id TEXT REFERENCES questions(id),
-  tag TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS answers (
+  id serial PRIMARY KEY,
+  content TEXT NOT NULL,
+  created_on TIMESTAMP NOT NULL DEFAULT NOW(),
+  corresponding_question integer REFERENCES questions
 );
