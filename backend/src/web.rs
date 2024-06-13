@@ -1,6 +1,7 @@
+use crate::routes::question::format_tags;
+use crate::types::question::Question;
 use crate::*;
 use askama_axum::Template;
-
 /// The IndexTemplate struct represents a template for rendering an index page with optional
 /// question, tags, stylesheet, and error information.
 /// Properties:
@@ -14,8 +15,8 @@ use askama_axum::Template;
 /// * `error`: The `error` property in the `IndexTemplate` struct is an optional field that holds a
 /// message or description of an error that may have occurred. It allows for displaying error messages
 /// to the user when rendering the template.
-#[derive(Template)]
-#[template(path = "../../frontend/index.html")]
+//#[derive(Template)]
+//#[template(path = "index.html")]
 pub struct IndexTemplate<'a> {
     question: Option<&'a Question>,
     tags: Option<String>,

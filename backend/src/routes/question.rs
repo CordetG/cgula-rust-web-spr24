@@ -48,11 +48,11 @@ pub async fn get_questions(
     store: Store,
 ) -> Result<impl IntoResponse, StatusCode> {
     event!(target: "backend", Level::INFO, "querying questions");
-    let mut pagination: crate::types::pagination::Pagination = Pagination::default();
+    //let mut pagination: crate::types::pagination::Pagination = Pagination::default();
 
     if !params.is_empty() {
         event!(Level::INFO, pagination = true);
-        pagination = extract_pagination(params)?;
+        //pagination = extract_pagination(params)?;
     }
     match store.get_questions().await {
         Ok(questions) => Ok(axum::Json(questions)),
@@ -80,16 +80,11 @@ pub async fn get_questions(
 /// If the question is successfully updated, it returns a 200 OK response.
 /// If the question with the provided ID is not found, it returns a 404 Not Found response.
 pub async fn update_question(
-    Path(id): Path<String>,
+    id: i32,
     store: Store,
     question: axum::Json<Question>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    match store
-        .questions
-        .write()
-        .await
-        .get_mut(&QuestionId(id.clone()))
-    {
+    match store.update_question(question, id).await {
         Some(q) => {
             *q = question.0;
             Ok("Question updated")

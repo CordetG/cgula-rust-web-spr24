@@ -60,6 +60,7 @@ mod web;
 use crate::routes::question::get_questions;
 use crate::store::*;
 
+use clap::Parser;
 use log::{debug, error, info, warn};
 
 /*info!("User {} logged in", user.id);
@@ -75,6 +76,13 @@ debug!(
 /// slice that points to a sequence of UTF-8 bytes in memory.
 const STYLESHEET: &str = "../../frontend/index.css";
 
+#[derive(Parser)]
+#[command(version, about, long_about=None)]
+struct Args {
+    #[clap(short, long, default_value = "0.0.0.0:3000")]
+    serve: String,
+}
+
 // testing out yew from tutorial
 #[function_component(App)]
 fn app() -> Html {
@@ -84,56 +92,17 @@ fn app() -> Html {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> (){
     let log_filter: String = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "handle_errors=warn,backend=warn,axum=warn".to_owned());
-    let store: Store = Store::new();
-    let store_clone: Store = store.clone();
-    let store_arc: Arc<Store> = Arc::new(store);
 
-    let store_filter: Extension<Arc<Store>> = axum::extract::Extension(store_arc);
-
-    let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
-    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3060);
-
-    let cors: CorsLayer = cors::CorsLayer::new()
-        .allow_methods([Method::GET])
-        .allow_origin(cors::Any);
-
-    let http_server: Router = Router::new()
-        .route(
-            "/backend",
-            get(get_questions)
-                .route("/questions", post(add_question))
-                .route("/questions/:id", put(update_question))
-                .route("/questions/:id", delete(delete_question)),
-        )
-        .layer(
-            CorsLayer::new()
-                .allow_origin("http://localhost:3060".parse::<HeaderValue>().unwrap())
-                .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
-        );
-
-    // run with hyper, listening globally on port 3060
-    let listener: tokio::net::TcpListener =
-        tokio::net::TcpListener::bind(socket_addr).await.unwrap();
-    tracing::debug!("serving {}", listener.local_addr().unwrap());
-    axum::serve(listener, http_server).await.unwrap();
-
-    // reqwest with async/await
-    let resp: HashMap<String, String> = reqwest::get("https://httpbin.org/ip")
-        .await?
-        .json::<HashMap<String, String>>()
-        .await?;
-    println!("{:#?}", resp);
-    Ok(())
-
-    /*let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
+    //let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
 
     let mut conn: mysql_async::Conn = pool.get_conn().await.unwrap();
     let result: () = conn
         .query_drop("CREATE TABLE users (id INT, name TEXT)")
         .await
-        .unwrap();*/
-    //startup::startup();
-}
+        .unwrap();
+    let args = Args::parse();
+    startup::startup(args.serve).await
+})
