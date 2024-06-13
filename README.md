@@ -56,7 +56,7 @@ I also got to see how cookies and authentication is written and what their uses 
 
 A vast majority of my time was spent just trying to correct compilation errors because trying to integrate axum into the book examples got rather confusing -- in part because I think the book could use some improvement as I would get lost on what files the author was changing -- he wasn't very clear about that and I would end up frustrated. Only when I came across a link to the [book's code repo](https://github.com/Rust-Web-Development/code/blob/main/) was I able to understand that there were multiple modules and submodules. 
 
-If I had more time to work on this, I would have liked to utilize more frontend stuff and create a favicon and the like. I would also have liked to really get the thing up and running better. I also intended to utilize the [test-api script from the class repo](https://github.com/pdx-cs-rust-web/knock-knock/blob/main/test-api.py) to update and run it on my code, but I didn't quite get to that.
+If I had more time to work on this, I would have liked to utilize more frontend stuff and create a favicon and the like. I would also have liked to really get the thing up and running better. I also intended to utilize the [test-api script from the class repo](https://github.com/pdx-cs-rust-web/knock-knock/blob/main/test-api.py) to update and run it on my code, but I didn't quite get to that. I also didn't get a chance to really clean it up nad complete my docs -- but the backend was a beast.
 
 ### Things I could work on
 
