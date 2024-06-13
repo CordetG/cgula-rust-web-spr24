@@ -18,6 +18,8 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 <summary>Rust Web Examples</summary>
 <!-- blank line-->
 
++ [What I Learned](#what-i-learned)
+    + [Things I could work on](#things-i-could-work-on)
 + [Assignments](#assignments)
 + [Setup](#setup)
     + [Repo](#repo)
@@ -35,6 +37,7 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
     + [Chapter 10](#chapter-10)
     + [Chapter 11](#chapter-11)
 + [Front End](#front-end)
+    + [Docs](#docs)
 + [Error Notes](#error-notes)
 + [MISC. Notes](#misc-notes)
 + [Acknowledgments](#acknowledgments)
@@ -44,6 +47,28 @@ Rust Web Example is a course repo dedicated to Rust Web Development. The focus o
 </details>
 
 <!-- End TOC -->
+
+## What I Learned
+
+While I don't consider my project to be completely successful, I learned a lot about integrating rust into web development. I also gained a better understanding of the workings of rust language itself. For example, when creating submodules from chapter 5, I realized that adding the mod.rs helps the compiler connect all the submodules so main can integrate them. 
+
+I also got to see how cookies and authentication is written and what their uses are. Prior to this class, my basic understanding of cookies was just annoying trackers that popup on almost every website. As far as authentication from websites, I knew *what* it was but did not have a strong understanding of *how* they worked -- something that this class helped me gain a better understanding of; even if we couldn't get it fully implemented. 
+
+A vast majority of my time was spent just trying to correct compilation errors because trying to integrate axum into the book examples got rather confusing -- in part because I think the book could use some improvement as I would get lost on what files the author was changing -- he wasn't very clear about that and I would end up frustrated. Only when I came across a link to the [book's code repo](https://github.com/Rust-Web-Development/code/blob/main/) was I able to understand that there were multiple modules and submodules. 
+
+If I had more time to work on this, I would have liked to utilize more frontend stuff and create a favicon and the like. I would also have liked to really get the thing up and running better. I also intended to utilize the [test-api script from the class repo](https://github.com/pdx-cs-rust-web/knock-knock/blob/main/test-api.py) to update and run it on my code, but I didn't quite get to that.
+
+### Things I could work on
+
+I know that I have limited experience in some concepts regarding web-dev which ended up being some of my struggling points. I'd argue however, that struggling -- and by extension fixing errors -- helps me learn how it works more than by successfully completing it `accidently`. 
+
+I know that I have limited knowledge in how databases function in the integration of we development backend, so this is a key point for me to study more on. I found that the book didn't really explain it all that well and it seemed like there was some implied knowledge in the book -- which for me, is difficult for me to fill in those gaps. I like material that doesn't assume you know what the author knows.
+
+I do still need to fill in some gaps for integrating all the pieces of web-dev with rust as there was a lot of moving parts and argueably, not enough time to poke at things and learn how they work; but I did my best in the allotted time. This is a class I could see needing to be in *at least* 2 classes if it were taught in the future. 
+
+Docker... Holy mother-of-god was docker a *docking* pain *hehe*. I couldn't get the thing to work -- and yeah, good documentation is important. It's precisely these examples of poor documentation that I try to incorporate decent documention in my code and README so there is minimal guessing as to what my thought process was.
+
+Trunk also had a learning curve, but I was able to get it to work -- so it's not too bad. I would like to get a better understanding of how trunk works in the future.
 
 ## Assignments
 
@@ -262,11 +287,45 @@ Passes `cargo clippy`
     Finished dev [unoptimized + debuginfo] target(s) in 0.11s
 ```
 
-<!-- Current -->
-
 ### Chapter 5
 
+Cleaning up the crate.
+
+Once I found the repo, I could see better how the author was working on the code examples. In the book, it was just a series of vague disconnected examples. As such I re-organized my backend crate to use submodules.
+
+```txt
+backend/
+    routes/
+        answer.rs
+        mod.rs
+        question.rs
+    types/
+        answer.rs
+        mod.rs
+        pagination.rs
+        question.rs
+    api.rs
+    appstate.rs
+    error.rs
+    main.ra
+    startup.rs
+    store.rs
+    web.rs
+```
+
+I could have probably done more to organize it better, but this is good enough for now.
+
 ### Chapter 6
+
+Logging.
+
+I was a little uncertain on the procedure for logging, but I implemented a line in main based on the book example.
+Looking at the repo, he somehow generated `.log` and `.yaml` files which I am still a little lost on.
+
+```rust
+    let log_filter: String = std::env::var("RUST_LOG")
+        .unwrap_or_else(|_| "handle_errors=warn,backend=warn,axum=warn".to_owned());
+```
 
 ### Chapter 7
 
@@ -397,6 +456,20 @@ I realized that the `.trunk` directory needed to be in the frontend crate. Prior
 
 ![Screenshot of question server running](./assets/question-running.png)
 
+### Docs
+
+Here is a couple screenshots of my docs for the frontend.
+
+```sh
+--> cargo doc --open
+```
+
+![Screenshot of Docs main-page](./assets/cargo-frontend-docs.png)
+
+</br>
+
+![Screenshot of question module](./assets/frontend-docs-q-mod.png)
+
 ## Error Notes
 
 To better help with my personal understanding of the content, I noted errors I came across in [the error-notes.md file](./error-notes.md).
@@ -439,7 +512,7 @@ https://www.shuttle.rs/blog/2023/12/06/using-axum-rust
 <!-- trunk-ignore(markdownlint/MD034) -->
 https://docs.rs/axum/latest/axum/
 
-[Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)
+[Mintlify Doc Writer](https://marketplace.visualstudio.com/items?itemName=mintlify.document)[^1]
 
 [Docker & Rust](https://docs.docker.com/language/rust/?uuid=2475bfc7-4dda-4e0b-9eb8-333f3d77c9c4%0A)
 
@@ -450,7 +523,7 @@ https://docs.rs/axum/latest/axum/
 <!-- trunk-ignore(markdownlint/MD034) -->
 https://lib.rs/crates/cargo-renamepkg
 
-GitHub Co-Pilot
+GitHub Co-Pilot[^2]
 
 ## License
 
@@ -460,3 +533,7 @@ This project is licensed with the [MIT license](./LICENSE).
 <!-- Link to top of README -->
 
 [&uarr; Back to Top](README.md#rust-web-examples)
+
+[^1]: Mintlify is my go-to reference for assisting with writing doc-comments, however vscode was updated recently and Mintlify always stops working. I contributed to my first external issue though: [see mintlify issue](https://github.com/mintlify/writer/issues/132)
+
+[^2]: Because Mintlify had stopped working, I caved and used installed GitHub Copilot for assisting in doc-writing. I found GitHub Copilot to be useful for helping resolve some errors as well. It's not perfect by any means -- but is a good interactive rubber duck.
