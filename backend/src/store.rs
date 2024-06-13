@@ -43,7 +43,6 @@ use utoipa::{
 };
 
 use crate::routes::question::get_questions;
-use crate::types::question::{NewAnswer, NewQuestion};
 use sqlx::error::Error as SqlxError;
 use tracing::{event, instrument, Level};
 
@@ -61,7 +60,7 @@ impl Store {
         if let Some(tags) = tags {
             for tag in tags {
                 sqlx::query(r#"INSERT INTO tags (id, tag) VALUES ($1, $2);"#)
-                    .bind(id)
+                    .bind(id.0.as_str())
                     .bind(tag)
                     .execute(&mut *tx)
                     .await?;
@@ -97,7 +96,7 @@ impl Store {
             id: QuestionId(row.get("id")),
             title: row.get("title"),
             content: row.get("content"),
-            tags: row.get("tags"),
+            tags,
         })
     }
 
@@ -112,7 +111,7 @@ impl Store {
     }
 
     pub async fn get_random(&self) -> Result<Question, StoreErr> {
-        let row = sqlx::query(r#"SELECT * FROM questions ORDER BY RANDOM () LIMIT 1;"#)
+        let row: PgRow = sqlx::query(r#"SELECT * FROM questions ORDER BY RANDOM () LIMIT 1;"#)
             .fetch_one(&self.connection)
             .await?;
 
@@ -120,8 +119,8 @@ impl Store {
         Ok(question)
     }
 
-    pub async fn get_jokes<'a>(&self) -> Result<Vec<Question>, StoreErr> {
-        let rows = sqlx::query(r#"SELECT * FROM questions;"#)
+    pub async fn get_questions<'a>(&self) -> Result<Vec<Question>, StoreErr> {
+        let rows = sqlx::query(r#"SELECT * FROM jokes;"#)
             .fetch_all(&self.connection)
             .await?;
         let mut questions: Vec<Question> = Vec::with_capacity(rows.len());
@@ -133,51 +132,54 @@ impl Store {
 
     // Define an async handler function for Axum
 
-    pub async fn add_question(&self, new_question: NewQuestion) -> Result<Question, sqlx::Error> {
-        match sqlx::query("INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)")
+    pub async fn add_question(
+        &self,
+        new_question: Question,
+        question_id: i32,
+    ) -> Result<(), sqlx::Error> {
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.connection).await?;
+        sqlx::query("INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)")
+            .bind(question_id)
             .bind(new_question.title)
             .bind(new_question.content)
-            .bind(new_question.tags)
-            .map(|row: PgRow| Question {
-                id: QuestionId(row.get("id")),
-                title: row.get("title"),
-                content: row.get("content"),
-                tags: row.get("tags"),
-            })
-            .fetch_one(&self.connection)
-            .await
-        {
-            Ok(question) => Ok(question),
-            Err(e) => Err(e),
-        }
+            .execute(&mut *tx)
+            .await;
+        Self::insert_tags(&mut tx, &new_question.id, &new_question.tags).await?;
+        Ok(tx.commit().await?)
     }
 
-    pub async fn delete(&mut self, index: &str) -> Result<(), StoreErr> {
-        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.questions).await?;
+    pub async fn delete_question(&mut self, index: &str) -> Result<(), StoreErr> {
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.connection).await?;
         sqlx::query(r#"DELETE FROM tags WHERE id = $1;"#)
             .bind(index)
             .execute(&mut *tx)
             .await?;
-        let result = sqlx::query(r#"DELETE FROM questions WHERE id = $1 RETURNING questions.id;"#)
-            .bind(index)
-            .fetch_all(&mut *tx)
-            .await?;
+        let result: Vec<PgRow> =
+            sqlx::query(r#"DELETE FROM questions WHERE id = $1 RETURNING questions.id;"#)
+                .bind(index)
+                .fetch_all(&mut *tx)
+                .await?;
         if result.len() == 0 {
             return Err(StoreErr::QuestionNotFound(index.to_string()));
         }
         Ok(tx.commit().await?)
     }
 
-    pub async fn update(&mut self, index: &str, question: Question) -> Result<(), StoreErr> {
-        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.questions).await?;
+    pub async fn update_question(
+        &mut self,
+        index: &str,
+        question: Question,
+        question_id: i32,
+    ) -> Result<(), StoreErr> {
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.connection).await?;
         let q: sqlx::query::Query<Postgres, sqlx::postgres::PgArguments> = sqlx::query(
             r#"UPDATE questions
         SET (title, content) = ($2, $3)
-        WHERE questions.id = $1
-        RETURNING questions.id;"#,
+        WHERE id = $1
+        RETURNING id;"#,
         );
         let result: Vec<PgRow> = q
-            .bind(&question.id)
+            .bind(&question_id)
             .bind(&question.title)
             .bind(&question.content)
             .fetch_all(&mut *tx)
@@ -190,6 +192,17 @@ impl Store {
             .execute(&mut *tx)
             .await?;
         Self::insert_tags(&mut tx, &question.id, &question.tags).await?;
+        Ok(tx.commit().await?)
+    }
+
+    pub async fn add_answer(&self, new_answer: Answer) -> Result<(), sqlx::Error> {
+        let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.connection).await?;
+        sqlx::query("INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)")
+            .bind(new_answer.question_id.0)
+            .bind(new_answer.content)
+            .bind(new_answer.id.0)
+            .execute(&mut *tx)
+            .await;
         Ok(tx.commit().await?)
     }
 }

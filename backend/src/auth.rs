@@ -1,6 +1,7 @@
 // From knock-knock/src/authjwt.rs.
 // From https://github.com/shuttle-hq/shuttle-examples/axum/jwt-authentication
 
+use crate::error::error_schema;
 use crate::*;
 use chrono::Utc;
 

@@ -13,7 +13,9 @@
 
 use crate::store::Store;
 use crate::types::pagination::extract_pagination;
+use crate::types::pagination::Pagination;
 use crate::types::question::{Question, QuestionId};
+use tracing::{event, Level};
 
 use axum::extract::{self, path, Extension, Path, State};
 use axum::{
@@ -44,14 +46,20 @@ use tokio::sync::RwLock;
 pub async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
-) -> axum::Json<Vec<Question>> {
-    let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
+) -> Result<impl IntoResponse, StatusCode> {
+    event!(target: "backend", Level::INFO, "querying questions");
+    let mut pagination: crate::types::pagination::Pagination = Pagination::default();
+
     if !params.is_empty() {
-        let pagination: crate::types::pagination::Pagination = extract_pagination(params).unwrap();
-        let res: &[Question] = &res[pagination.start..pagination.end];
-        axum::Json(res.into())
-    } else {
-        axum::Json(res)
+        event!(Level::INFO, pagination = true);
+        pagination = extract_pagination(params)?;
+    }
+    match store.get_questions().await {
+        Ok(questions) => Ok(axum::Json(questions)),
+        Err(e) => {
+            event!(Level::ERROR, error = %e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 

@@ -94,7 +94,7 @@ pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {
         .allow_origin(cors::Any);
 
     let http_server: Router = Router::new()
-        .route("/backend", get(Store::get_questions))
+        .route("/backend", get(get_questions))
         .layer(
             CorsLayer::new()
                 .allow_origin("http://localhost:3060".parse::<HeaderValue>().unwrap())

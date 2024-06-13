@@ -14,21 +14,14 @@ use crate::types::{
     question::QuestionId,
 };
 
-async fn add_answer(
-    Extension(store): Extension<Store>,
-    Json(params): Json<HashMap<String, String>>,
-) -> impl IntoResponse {
-    let answer: Answer = Answer {
+async fn add_answer(store: Store, new_answer: Answer) -> impl IntoResponse {
+    /*let answer: Answer = Answer {
         id: AnswerId("1".to_string()),
         content: params.get("content").unwrap().to_string(),
         question_id: QuestionId(params.get("questionId").unwrap().to_string()),
-    };
+    };*/
 
-    store
-        .answers
-        .write()
-        .await
-        .insert(answer.id.clone(), answer);
+    store.add_answer(new_answer.clone()).await;
 
     (
         StatusCode::OK,

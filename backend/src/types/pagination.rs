@@ -1,4 +1,7 @@
+use http::StatusCode;
+
 use crate::error::StoreErr;
+use crate::error::StoreErr::ParseError;
 use std::collections::HashMap;
 
 /*
@@ -48,16 +51,18 @@ pub fn extract_pagination(params: HashMap<String, String>) -> Result<Pagination,
                     .get("limit")
                     .unwrap()
                     .parse::<u32>()
-                    .map_err(StoreErr::ParseError.into())?,
+                    .map_err(|e| ParseError(e.to_string()))?,
             ),
             // Takes the "offset" parameter in the query and tries to convert it to a number
             offset: params
                 .get("offset")
                 .unwrap()
                 .parse::<u32>()
-                .map_err(StoreErr::ParseError.into())?,
+                .map_err(|e| ParseError(e.to_string()))?,
         });
     }
 
-    Err(StoreErr::MissingParameters.to_string().into())
+    Err(StoreErr::MissingParameters(
+        "Missing Parameters".to_string(),
+    ))
 }
