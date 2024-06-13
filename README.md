@@ -476,6 +476,8 @@ To better help with my personal understanding of the content, I noted errors I c
 
 ## MISC. Notes
 
+To be frank, I had quite a bit of personal struggles this term and `protesting` incidents negatively impacted me. However, to give myself some credit, I think I did okay despite these challenges.
+
 I decided to try to add the port `3060` as used in my application to vscode to see if it would be of any benefit for running a service.
 ![Screenshot of port-forwarding](./assets/port-forwarding.png)
 
@@ -487,7 +489,7 @@ While I liked the `live book` on the manning website due to it being interactive
 
 ## Acknowledgments
 
-Thanks to Bart Massey for teaching the course material and for the examples provided in the jokes repository that was a helpful resource to implementing the web server, database, etc.
+Thanks to Bart Massey for teaching the course material and for the examples provided in the jokes repository that was a helpful resource to implementing the web server, database, etc. I also want to acknowledge that it is admirable that Bart took on teaching the rust-web-dev class for the first time and with rust web dev still being relatively new, I learned a lot and gained important knowledge from the class. I think it would be useful to have it again in the future and to view this first class as an oppurtunity for growth and learning how it can be improved for the future.
 
 Thanks to the developers of tokio and axum.
 
