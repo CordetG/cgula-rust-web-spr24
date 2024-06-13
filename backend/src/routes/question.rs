@@ -14,6 +14,20 @@ use serde_json::json;
 use std::collections::HashMap;
 use tokio::sync::RwLock;
 
+/// Fetches a list of questions from the store.
+///
+/// This function reads the questions from the store and returns them as a JSON response.
+/// If pagination parameters are provided, it will return a paginated list of questions.
+///
+/// # Arguments
+///
+/// * `params` - A hashmap containing query parameters. It can include pagination parameters.
+/// * `store` - The shared state of the application, which includes the list of questions.
+///
+/// # Returns
+///
+/// This function returns a JSON response containing a list of questions. If pagination parameters
+/// are provided, the list will be paginated according to those parameters.
 pub async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
@@ -28,6 +42,22 @@ pub async fn get_questions(
     }
 }
 
+/// Updates a specific question in the store.
+///
+/// This function takes an ID, a shared state of the application, and a JSON body containing the updated question.
+/// It then updates the question in the store with the provided ID.
+///
+/// # Arguments
+///
+/// * `id` - The ID of the question to update.
+/// * `store` - The shared state of the application, which includes the list of questions.
+/// * `question` - The updated question, provided as a JSON body in the request.
+///
+/// # Returns
+///
+/// This function returns a response that can be converted into an HTTP response.
+/// If the question is successfully updated, it returns a 200 OK response.
+/// If the question with the provided ID is not found, it returns a 404 Not Found response.
 pub async fn update_question(
     Path(id): Path<String>,
     store: Store,
@@ -47,6 +77,21 @@ pub async fn update_question(
     }
 }
 
+/// Deletes a specific question from the store.
+///
+/// This function takes an ID and a shared state of the application.
+/// It then removes the question with the provided ID from the store.
+///
+/// # Arguments
+///
+/// * `id` - The ID of the question to delete.
+/// * `store` - The shared state of the application, which includes the list of questions.
+///
+/// # Returns
+///
+/// This function returns a response that can be converted into an HTTP response.
+/// If the question is successfully deleted, it returns a 200 OK response with a message "Question deleted".
+/// If the question with the provided ID is not found, it returns a 404 Not Found response.
 pub async fn delete_question(
     Path(id): Path<String>,
     store: Store,
@@ -62,6 +107,20 @@ pub async fn delete_question(
     }
 }
 
+/// Adds a new question to the store.
+///
+/// This function takes a shared state of the application and a JSON body containing the new question.
+/// It then adds the new question to the store.
+///
+/// # Arguments
+///
+/// * `store` - The shared state of the application, which includes the list of questions.
+/// * `question` - The new question, provided as a JSON body in the request.
+///
+/// # Returns
+///
+/// This function returns a response that can be converted into an HTTP response.
+/// If the question is successfully added, it returns a 200 OK response.
 pub async fn add_question(store: Store, question: axum::Json<Question>) -> impl IntoResponse {
     let question = question.0;
     store
