@@ -72,6 +72,13 @@ Trunk also had a learning curve, but I was able to get it to work -- so it's not
 
 ## Assignments
 
+Last update: Backend passes `cargo check`
+
+```sh
+Checking backend v0.1.2 (/home/shadoux/Desktop/git_local/rust_web/backend)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.65s
+```
+
 To make access to the specific assignments easier, I made this guide to point to the corresponding write-ups in repo.
 
 Homework 1: Git Repo Started.
