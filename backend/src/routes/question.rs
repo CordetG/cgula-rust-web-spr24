@@ -1,3 +1,16 @@
+//! # Question Routes
+//!
+//! This module contains the HTTP routes for operations related to questions.
+//!
+//! It includes the following routes:
+//! * `get_questions`: Fetches a list of questions from the store.
+//! * `update_question`: Updates a specific question in the store.
+//! * `delete_question`: Deletes a specific question from the store.
+//! * `add_question`: Adds a new question to the store.
+//!
+//! Each route function takes a shared state of the application and other necessary parameters,
+//! performs the corresponding operation, and returns a response that can be converted into an HTTP response.
+
 use crate::store::Store;
 use crate::types::pagination::extract_pagination;
 use crate::types::question::{Question, QuestionId};
