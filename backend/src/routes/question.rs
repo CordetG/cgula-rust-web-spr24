@@ -17,6 +17,7 @@ use crate::types::pagination::Pagination;
 use crate::types::question::{Question, QuestionId};
 use tracing::{event, Level};
 
+use crate::error;
 use axum::extract::{self, path, Extension, Path, State};
 use axum::{
     http::{HeaderValue, Method, StatusCode},
@@ -81,16 +82,10 @@ pub async fn get_questions(
 /// If the question with the provided ID is not found, it returns a 404 Not Found response.
 pub async fn update_question(
     id: i32,
-    store: Store,
-    question: axum::Json<Question>,
-) -> Result<impl IntoResponse, StatusCode> {
-    match store.update_question(question, id).await {
-        Some(q) => {
-            *q = question.0;
-            Ok("Question updated")
-        }
-        None => Err(StatusCode::NOT_FOUND),
-    }
+    mut store: Store,
+    question: Question,
+) -> Result<(), error::StoreErr> {
+    store.update_question("1", question, id).await
 }
 
 /// Deletes a specific question from the store.
@@ -110,16 +105,14 @@ pub async fn update_question(
 /// If the question with the provided ID is not found, it returns a 404 Not Found response.
 pub async fn delete_question(
     Path(id): Path<String>,
-    store: Store,
+    mut store: Store,
 ) -> Result<impl IntoResponse, StatusCode> {
-    match store
-        .questions
-        .write()
-        .await
-        .remove(&QuestionId(id.clone()))
-    {
-        Some(_) => Ok("Question deleted"),
-        None => Err(StatusCode::NOT_FOUND),
+    match store.delete_question(id.as_str()).await {
+        Ok(_) => Ok("Question deleted"),
+        Err(e) => {
+            event!(Level::ERROR, error = %e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
@@ -139,11 +132,7 @@ pub async fn delete_question(
 /// If the question is successfully added, it returns a 200 OK response.
 pub async fn add_question(store: Store, question: axum::Json<Question>) -> impl IntoResponse {
     let question = question.0;
-    store
-        .questions
-        .write()
-        .await
-        .insert(question.id.clone(), question);
+    store.add_question(question, 1).await;
     StatusCode::OK
 }
 
@@ -196,7 +185,7 @@ impl From<&Question> for String {
         text += &format!("{}\n", question.content);
         text += "\n";
 
-        let mut annote: Vec<String> = vec![format!("id: {}", question.id)];
+        let mut annote: Vec<String> = vec![format!("id: {:?}", question.id)];
         if let Some(tags) = &question.tags {
             annote.push(format!("tags: {}", format_tags(tags)));
         }

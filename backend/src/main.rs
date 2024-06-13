@@ -92,17 +92,11 @@ fn app() -> Html {
 }
 
 #[tokio::main]
-async fn main() -> (){
+async fn main() {
     let log_filter: String = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "handle_errors=warn,backend=warn,axum=warn".to_owned());
 
     //let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
-
-    let mut conn: mysql_async::Conn = pool.get_conn().await.unwrap();
-    let result: () = conn
-        .query_drop("CREATE TABLE users (id INT, name TEXT)")
-        .await
-        .unwrap();
     let args = Args::parse();
     startup::startup(args.serve).await
-})
+}

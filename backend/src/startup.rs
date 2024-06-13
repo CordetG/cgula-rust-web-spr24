@@ -57,7 +57,7 @@ pub async fn startup(ip: String) {
 
     let url = "localhost:5432";
 
-    let jokebase: Store = Store::new(&url).await;
+    let jokebase: Store = Store::new(url).await;
     /*{
         tracing::error!("jokebase: {}", e);
         std::process::exit(1);

@@ -136,7 +136,7 @@ impl Store {
         &self,
         new_question: Question,
         question_id: i32,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), StoreErr> {
         let mut tx: sqlx::Transaction<'_, Postgres> = Pool::begin(&self.connection).await?;
         sqlx::query("INSERT INTO questions (title, content, tags) VALUES ($1, $2, $3)")
             .bind(question_id)
@@ -159,6 +159,7 @@ impl Store {
                 .bind(index)
                 .fetch_all(&mut *tx)
                 .await?;
+        #[allow(clippy::len_zero)]
         if result.len() == 0 {
             return Err(StoreErr::QuestionNotFound(index.to_string()));
         }
@@ -179,12 +180,12 @@ impl Store {
         RETURNING id;"#,
         );
         let result: Vec<PgRow> = q
-            .bind(&question_id)
+            .bind(question_id)
             .bind(&question.title)
             .bind(&question.content)
             .fetch_all(&mut *tx)
             .await?;
-        if result.len() == 0 {
+        if result.is_empty() {
             return Err(StoreErr::QuestionNotFound(index.to_string()));
         }
         sqlx::query(r#"DELETE FROM tags WHERE id = $1;"#)
@@ -203,7 +204,7 @@ impl Store {
             .bind(new_answer.id.0)
             .execute(&mut *tx)
             .await;
-        Ok(tx.commit().await?)
+        tx.commit().await
     }
 }
 

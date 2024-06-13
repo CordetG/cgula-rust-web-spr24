@@ -9,6 +9,7 @@ use crate::auth::Registration;
 use crate::error::StoreError;
 use crate::types::question::Question;
 use axum_core::response::IntoResponse;
+use error::StoreErr;
 use utoipa::OpenApi;
 
 // Implementing Axum 'IntoResponse' from shuttle.rs but with the Serialized Question
@@ -69,7 +70,7 @@ impl IntoResponse for ApiError {
     }
 }
 
-#[derive(OpenApi)]
+#[derive(OpenApi, utoipa::ToSchema)]
 #[openapi(
     paths(
         questions,
@@ -80,7 +81,7 @@ impl IntoResponse for ApiError {
         update_question,
     ),
     components(
-        schemas(Question, StoreError)
+        schemas(StoreError)
     ),
     tags(
         (name = "question", description = "Question API")
@@ -96,11 +97,11 @@ pub struct ApiDoc;
     )
 )]
 pub async fn questions(State(appstate): HandlerAppState) -> Response {
-    let questions: Result<Vec<Question>, sqlx::Error> =
-        appstate.read().await.store.get_questions(None, 1).await;
+    let questions: Result<Vec<Question>, StoreErr> =
+        appstate.read().await.store.get_questions().await;
     match questions {
         Ok(questions) => Json(questions).into_response(),
-        Err(e) => StoreError::response(StatusCode::INTERNAL_SERVER_ERROR, e.into()),
+        Err(e) => StoreError::response(StatusCode::INTERNAL_SERVER_ERROR, e),
     }
 }
 
@@ -142,7 +143,7 @@ pub async fn get_question(
     post,
     path = "/api/v1/question/add",
     request_body(
-        content = inline(Question),
+        content = inline(StoreError),
         description = "Question to add"
     ),
     responses(
@@ -155,7 +156,7 @@ pub async fn post_question(
     State(appstate): HandlerAppState,
     Json(question): Json<Question>,
 ) -> Response {
-    match appstate.write().await.store.add(question).await {
+    match appstate.write().await.store.add_question(question, 1).await {
         Ok(()) => StatusCode::CREATED.into_response(),
         Err(e) => StoreError::response(StatusCode::BAD_REQUEST, e),
     }
@@ -174,7 +175,13 @@ pub async fn delete_question(
     State(appstate): HandlerAppState,
     Path(question_id): Path<String>,
 ) -> Response {
-    match appstate.write().await.store.delete(&question_id).await {
+    match appstate
+        .write()
+        .await
+        .store
+        .delete_question(&question_id)
+        .await
+    {
         Ok(()) => StatusCode::OK.into_response(),
         Err(e) => StoreError::response(StatusCode::BAD_REQUEST, e),
     }
@@ -184,7 +191,7 @@ pub async fn delete_question(
     put,
     path = "/api/v1/question/{id}",
     request_body(
-        content = inline(Question),
+        content = inline(StoreError),
         description = "Question to update"
     ),
     responses(
@@ -204,7 +211,7 @@ pub async fn update_question(
         .write()
         .await
         .store
-        .update(&question_id, question)
+        .update_question(&question_id, question, 1)
         .await
     {
         Ok(_) => StatusCode::OK.into_response(),
