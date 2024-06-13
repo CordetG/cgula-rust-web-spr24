@@ -1,3 +1,4 @@
+use crate::store::Store;
 use crate::*;
 use appstate::AppState;
 use axum::extract::FromRequest;
@@ -23,7 +24,7 @@ async fn handler(
     params: Json<HashMap<String, String>>,
     store: Store,
 ) -> Result<Json<Vec<Question>>, Infallible> {
-    Store::get_questions(params.into_inner(), store).await
+    store.get_questions(params.into_inner(), store).await
 }
 
 pub async fn startup() -> Result<(), Box<dyn std::error::Error>> {

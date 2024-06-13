@@ -18,7 +18,7 @@ async fn add_answer(
     Extension(store): Extension<Store>,
     Json(params): Json<HashMap<String, String>>,
 ) -> impl IntoResponse {
-    let answer = Answer {
+    let answer: Answer = Answer {
         id: AnswerId("1".to_string()),
         content: params.get("content").unwrap().to_string(),
         question_id: QuestionId(params.get("questionId").unwrap().to_string()),

@@ -10,6 +10,7 @@ use axum::{
     Json, Router,
 };
 use core::convert::Infallible;
+use std::ops::Add;
 use tracing::{event, instrument, Level};
 
 use axum_macros::debug_handler;
@@ -33,13 +34,21 @@ use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
 
+use std::fmt;
+
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct QuestionId(pub i32);
+
+impl fmt::Display for QuestionId {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Question {
     #[schema(example = "1")]
-    pub id: String,
+    pub id: QuestionId,
     #[schema(example = "How?")]
     pub title: String,
     #[schema(example = "Please help!")]
@@ -84,8 +93,14 @@ pub fn format_tags(tags: &HashSet<String>) -> String {
 }
 
 impl Question {
-    pub fn new(id: &str, title: &str, content: &str, tags: &[&str], source: Option<&str>) -> Self {
-        let id: String = id.into();
+    pub fn new(
+        id: QuestionId,
+        title: &str,
+        content: &str,
+        tags: &[&str],
+        source: Option<&str>,
+    ) -> Self {
+        let id: QuestionId = id;
         let title: String = title.into();
         let content: String = content.into();
         let tags: Option<HashSet<String>> = if tags.is_empty() {
@@ -125,18 +140,4 @@ impl IntoResponse for &Question {
     }
 }
 
-#[instrument]
-pub async fn get_questions(
-    params: HashMap<String, String>,
-    store: Store,
-) -> Result<impl axum::response::IntoResponse, axum::http::Error> {
-    if !params.is_empty() {
-        let pagination = extract_pagination(params)?;
-        let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-        let res = &res[pagination.start..pagination.end];
-        Ok(axum::response::Json(&res))
-    } else {
-        let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
-        Ok(axum::response::Json(&res))
-    }
-}
+

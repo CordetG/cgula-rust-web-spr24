@@ -19,6 +19,9 @@ use sqlx::{
     postgres::{PgConnection, PgPool, PgRow, Postgres},
     Pool, Row,
 };
+use tower::ServiceBuilder;
+
+use tower::ServiceExt;
 
 use axum_macros::debug_handler;
 use tower_http::add_extension::AddExtensionLayer;
@@ -35,25 +38,26 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use headers::ContentType;
 use serde::{Deserialize, Serialize};
 
+use axum::handler::Handler;
 use core::net::SocketAddr;
 use std::collections::{HashMap, HashSet};
 use std::io::{Error, ErrorKind};
 use std::net::{Ipv4Addr, SocketAddrV4, TcpStream};
 use std::str::FromStr;
 use std::sync::Arc;
-use tower::ServiceBuilder;
 use utoipa::openapi::Server;
-
 use yew::prelude::*;
 
 mod api;
 mod appstate;
 mod auth;
-pub mod question;
+mod error;
+mod routes;
 mod startup;
-pub mod store;
+mod store;
+mod types;
 mod web;
-use crate::question::*;
+use crate::routes::question::get_questions;
 use crate::store::*;
 
 use log::{debug, error, info, warn};
@@ -79,38 +83,57 @@ fn app() -> Html {
     }
 }
 
-// main function
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_filter: String = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=warn,warp=warn".to_owned());
-    let store: Store = store::Store::new("postgres://localhost:3060/guest").await;
-    use mysql_async::{prelude::Queryable, Pool};
+        .unwrap_or_else(|_| "handle_errors=warn,backend=warn,axum=warn".to_owned());
+    let store: Store = Store::new();
+    let store_clone: Store = store.clone();
+    let store_arc: Arc<Store> = Arc::new(store);
 
-    // Assuming `store` is your shared state
-    let store_layer: AddExtensionLayer<_> = AddExtensionLayer::new(store);
+    let store_filter: Extension<Arc<Store>> = axum::extract::Extension(store_arc);
 
-    let app = Router::new()
+    let localhost: Ipv4Addr = Ipv4Addr::new(127, 0, 0, 1);
+    let socket_addr: SocketAddrV4 = SocketAddrV4::new(localhost, 3060);
+
+    let cors: CorsLayer = cors::CorsLayer::new()
+        .allow_methods([Method::GET])
+        .allow_origin(cors::Any);
+
+    let http_server: Router = Router::new()
         .route(
-            "/questions/:id",
-            put(question::update_question).delete(question::delete_question),
+            "/backend",
+            get(get_questions)
+                .route("/questions", post(add_question))
+                .route("/questions/:id", put(update_question))
+                .route("/questions/:id", delete(delete_question)),
         )
-        .layer(ServiceBuilder::new().layer(store_layer))
-        .boxed();
+        .layer(
+            CorsLayer::new()
+                .allow_origin("http://localhost:3060".parse::<HeaderValue>().unwrap())
+                .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
+        );
 
-    // Then you can run your app with hyper
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3060));
-    hyper::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // run with hyper, listening globally on port 3060
+    let listener: tokio::net::TcpListener =
+        tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    tracing::debug!("serving {}", listener.local_addr().unwrap());
+    axum::serve(listener, http_server).await.unwrap();
 
-    let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
+    // reqwest with async/await
+    let resp: HashMap<String, String> = reqwest::get("https://httpbin.org/ip")
+        .await?
+        .json::<HashMap<String, String>>()
+        .await?;
+    println!("{:#?}", resp);
+    Ok(())
+
+    /*let pool: Pool = Pool::new("mysql://guest:123@localhost:3306/postgres");
 
     let mut conn: mysql_async::Conn = pool.get_conn().await.unwrap();
     let result: () = conn
         .query_drop("CREATE TABLE users (id INT, name TEXT)")
         .await
-        .unwrap();
-    startup::startup();
+        .unwrap();*/
+    //startup::startup();
 }

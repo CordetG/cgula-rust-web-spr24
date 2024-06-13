@@ -24,7 +24,7 @@ use axum::{
 };
 
 use serde_json::json;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use tokio::sync::RwLock;
 
 /// Fetches a list of questions from the store.
@@ -142,4 +142,69 @@ pub async fn add_question(store: Store, question: axum::Json<Question>) -> impl 
         .await
         .insert(question.id.clone(), question);
     StatusCode::OK
+}
+
+/// The function `format_tags` takes a HashSet of strings and returns a formatted string with the tags
+/// separated by commas.
+///
+/// Arguments:
+///
+/// * `tags`: The `format_tags` function takes a reference to a `HashSet` of `String` values as input.
+/// It then converts the `HashSet` into a vector of string references and joins them together with a
+/// comma and space to create a single formatted string.
+///
+/// Returns:
+///
+/// A formatted string containing the tags from the HashSet, separated by commas.
+pub fn format_tags(tags: &HashSet<String>) -> String {
+    let taglist: Vec<&str> = tags.iter().map(String::as_ref).collect();
+    taglist.join(", ")
+}
+
+impl Question {
+    pub fn new(
+        id: QuestionId,
+        title: &str,
+        content: &str,
+        tags: &[&str],
+        source: Option<&str>,
+    ) -> Self {
+        let id: QuestionId = id;
+        let title: String = title.into();
+        let content: String = content.into();
+        let tags: Option<HashSet<String>> = if tags.is_empty() {
+            None
+        } else {
+            Some(tags.iter().copied().map(String::from).collect())
+        };
+        Self {
+            id,
+            title,
+            content,
+            tags,
+        }
+    }
+}
+
+impl From<&Question> for String {
+    fn from(question: &Question) -> Self {
+        let mut text: String = "Question:\n".into();
+        text += &format!("{}.\n", question.title);
+        text += &format!("{}\n", question.content);
+        text += "\n";
+
+        let mut annote: Vec<String> = vec![format!("id: {}", question.id)];
+        if let Some(tags) = &question.tags {
+            annote.push(format!("tags: {}", format_tags(tags)));
+        }
+        let annote: String = annote.join("; ");
+        text += &format!("[{}]\n", annote);
+        text
+    }
+}
+
+impl IntoResponse for &Question {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(&self)).into_response()
+    }
 }
